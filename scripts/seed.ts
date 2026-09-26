@@ -102,6 +102,12 @@ const PAYMENTS: Pay[] = [
   { method: 'venmo', amount: 45, to: 'jpark', daysAgo: 15, memo: 'bolts', allocate: [] },
 ]
 
+// Builder labor: paid to the engine builder and assigned straight to cars.
+const LABOR: { method: PaymentMethod; amount: number; daysAgo: number; memo: string; cars: [car: number, amount: number][] }[] = [
+  { method: 'zelle', amount: 4000, daysAgo: 90, memo: 'machining deposit', cars: [[0, 2500], [3, 1500]] },
+  { method: 'zelle', amount: 1800, daysAgo: 25, memo: 'head work', cars: [[0, 1800]] },
+]
+
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
 const cents = (dollars: number) => Math.round(dollars * 100)
 
@@ -206,6 +212,23 @@ async function main() {
         'allocations',
       )
     }
+  }
+
+  for (const l of LABOR) {
+    const pay = check(
+      await db
+        .from('payments')
+        .insert({ household_id: hid, method: l.method, amount_cents: cents(l.amount), paid_at: daysAgo(l.daysAgo), counterparty: 'Engine builder', memo: l.memo })
+        .select('id')
+        .single(),
+      'labor payment',
+    )
+    ok(
+      await db.from('payment_allocations').insert(
+        l.cars.map(([car, amount]) => ({ household_id: hid, payment_id: pay.id, car_id: carIds[car], cost_type: 'labor', amount_cents: cents(amount) })),
+      ),
+      'labor allocations',
+    )
   }
 
   const shipments = [
