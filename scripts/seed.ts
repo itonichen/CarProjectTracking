@@ -1,9 +1,13 @@
 // Dev seed: one household, two users, four gen2 DOHC NA -> TT cars with
 // template slots, and a handful of fake acquisitions, payments and shipments.
 //
-//   npm run seed            (uses .env.local; run after `npx supabase db reset`)
+//   npm run seed              sample data (uses .env.local)
+//   npm run seed -- --empty   remove the sample data and start an empty
+//                             household for the first seed user
 //
-// Re-running replaces the seed household. Never point this at production.
+// Re-running replaces the seed household. It refuses to move a seed user out
+// of a real (non-seed) household unless --force is passed, so running it
+// after --empty can't strand real data. Never point this at production.
 
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
@@ -111,11 +115,32 @@ const LABOR: { method: PaymentMethod; amount: number; daysAgo: number; memo: str
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
 const cents = (dollars: number) => Math.round(dollars * 100)
 
+const EMPTY = process.argv.includes('--empty')
+const FORCE = process.argv.includes('--force')
+
 async function main() {
   const userIds = await Promise.all(emails.map(ensureUser))
 
+  const current = check(await db.from('household_members').select('user_id, households(name)').in('user_id', userIds), 'memberships') as unknown as {
+    user_id: string
+    households: { name: string }
+  }[]
+  const real = current.find((m) => m.households.name !== SEED_HOUSEHOLD)
+  if (real && !FORCE) {
+    throw new Error(`A seed user already belongs to "${real.households.name}". Re-run with --force to replace it with sample data (that household is kept, just left without this user).`)
+  }
+
   const removed = await db.from('households').delete().eq('name', SEED_HOUSEHOLD)
   if (removed.error) throw new Error(`remove old seed household: ${removed.error.message}`)
+
+  if (EMPTY) {
+    const name = process.env.HOUSEHOLD_NAME ?? 'Our garage'
+    const h = check(await db.from('households').insert({ name }).select('id').single(), 'household')
+    ok(await db.from('household_members').delete().in('user_id', userIds), 'clear memberships')
+    ok(await db.from('household_members').insert({ household_id: h.id, user_id: userIds[0] }), 'member')
+    console.log(`Removed sample data. "${name}" is empty and ready for ${emails[0]}.`)
+    return
+  }
   const household = check(await db.from('households').insert({ name: SEED_HOUSEHOLD }).select('id').single(), 'household')
   const hid = household.id as string
   // A user belongs to one household; drop any earlier membership (dev only).
