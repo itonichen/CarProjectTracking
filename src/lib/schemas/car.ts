@@ -39,3 +39,11 @@ export const newCarSchema = z
   .transform(({ budget, ...car }) => ({ ...car, budget_cents: budget, generation: generationForYear(car.year)! }))
 
 export type NewCarInput = z.input<typeof newCarSchema>
+
+/** The fields editable straight from a garage card. */
+export const carBasicsSchema = z.object({
+  id: z.uuid(),
+  nickname: z.string().trim().min(1, 'Name can’t be empty').max(60),
+  trim: optionalText(40),
+  color: optionalText(40),
+})
