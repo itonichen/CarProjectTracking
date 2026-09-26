@@ -30,7 +30,7 @@ export function CarOverview({
 }: {
   car: CarOverviewData
   slots: MapSlot[]
-  statuses: (StatusInfo & { id: string })[]
+  statuses: (StatusInfo & { id: string; label?: string })[]
   initialGroup: Group
   backHref?: string
 }) {
