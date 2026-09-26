@@ -1,7 +1,10 @@
-// Parts map geometry from the design handoff (3000gt-side.svg and
-// 3000gt-engine-bay.svg). Side view is passenger side, front on the right,
-// traced over public/partsmap/3000gt-lineart.png (1214×412). Engine bay is top
-// down, front at the top. Anchors are where count badges sit (viewBox units).
+// Parts map geometry. Side view (from the design handoff's 3000gt-side.svg) is
+// passenger side, front on the right, traced over
+// public/partsmap/3000gt-lineart.png (1214×412). Engine bay areas are traced
+// over public/partsmap/3000gt-engine-bay.jpg (960×704): hood up, seen from the
+// front, radiator at the bottom and firewall at the top. The art shows the
+// stock NA engine, so the turbo areas mark where each bank's turbo sits.
+// Anchors are where count badges sit (viewBox units).
 
 import type { CarSystem } from '../domain'
 
@@ -80,23 +83,27 @@ export type BayComponent = {
   zone: ZoneId
   anchor: [number, number]
   shapes: Shape[]
-  /** Pipes are drawn as thick strokes rather than filled shapes. */
-  stroke?: boolean
-  tone: 'part' | 'intake' | 'turbo' | 'battery'
 }
 
-export const BAY_VIEWBOX = { x: 0, y: 10, width: 800, height: 560 }
+export const BAY_VIEWBOX = { x: 0, y: 0, width: 960, height: 704 }
+export const BAY_LINEART = { href: '/partsmap/3000gt-engine-bay.jpg', width: 960, height: 704 }
 
 export const BAY: BayComponent[] = [
-  { id: 'ic-piping', name: 'Intercooler piping', zone: 'engine', anchor: [470, 140], stroke: true, tone: 'part', shapes: [{ d: 'M183 160C183 214 214 256 246 270M352 166C450 146 560 138 604 160' }] },
-  { id: 'radiator', name: 'Radiator & fans', zone: 'engine', anchor: [400, 99], tone: 'part', shapes: [{ x: 230, y: 84, w: 340, h: 30, rx: 5 }] },
-  { id: 'intercoolers', name: 'Intercoolers', zone: 'engine', anchor: [183, 128], tone: 'part', shapes: [{ x: 150, y: 96, w: 66, h: 64, rx: 8 }, { x: 584, y: 96, w: 66, h: 64, rx: 8 }] },
-  { id: 'engine-core', name: 'Long block & fuel', zone: 'engine', anchor: [395, 223], tone: 'part', shapes: [{ x: 250, y: 196, w: 290, h: 54, rx: 8 }, { x: 250, y: 306, w: 290, h: 54, rx: 8 }] },
-  { id: 'intake', name: 'Intake & plenum', zone: 'engine', anchor: [395, 278], tone: 'intake', shapes: [{ x: 262, y: 256, w: 266, h: 44, rx: 6 }, { cx: 246, cy: 278, r: 13 }, { x: 150, y: 330, w: 78, h: 62, rx: 8 }] },
-  { id: 'turbo-front', name: 'Front-bank turbo', zone: 'engine', anchor: [330, 168], tone: 'turbo', shapes: [{ cx: 330, cy: 168, r: 22 }] },
-  { id: 'turbo-rear', name: 'Rear-bank turbo', zone: 'engine', anchor: [470, 388], tone: 'turbo', shapes: [{ cx: 470, cy: 388, r: 22 }] },
-  { id: 'transaxle', name: 'Transaxle', zone: 'drivetrain', anchor: [603, 291], tone: 'part', shapes: [{ x: 556, y: 236, w: 94, h: 110, rx: 12 }] },
-  { id: 'battery', name: 'Battery', zone: 'engine', anchor: [555, 443], tone: 'battery', shapes: [{ x: 520, y: 420, w: 70, h: 46, rx: 4 }] },
+  { id: 'radiator', name: 'Radiator & fans', zone: 'engine', anchor: [500, 628], shapes: [{ x: 205, y: 588, w: 590, h: 78 }] },
+  { id: 'intercoolers', name: 'Intercoolers', zone: 'engine', anchor: [130, 618], shapes: [{ x: 55, y: 560, w: 150, h: 115 }, { x: 795, y: 560, w: 150, h: 115 }] },
+  {
+    id: 'ic-piping',
+    name: 'Intercooler piping',
+    zone: 'engine',
+    anchor: [292, 420],
+    shapes: [{ d: 'M232 592L292 592L335 450L405 222L372 178L320 198L250 430Z' }, { d: 'M588 128L650 138L762 298L932 388L926 442L756 382L700 332L582 176Z' }],
+  },
+  { id: 'intake', name: 'Intake & plenum', zone: 'engine', anchor: [570, 252], shapes: [{ x: 455, y: 172, w: 232, h: 158 }] },
+  { id: 'engine-core', name: 'Long block & fuel', zone: 'engine', anchor: [566, 468], shapes: [{ x: 415, y: 330, w: 300, h: 215 }] },
+  { id: 'turbo-front', name: 'Front-bank turbo', zone: 'engine', anchor: [392, 562], shapes: [{ cx: 392, cy: 562, r: 36 }] },
+  { id: 'turbo-rear', name: 'Rear-bank turbo', zone: 'engine', anchor: [560, 138], shapes: [{ cx: 560, cy: 138, r: 32 }] },
+  { id: 'transaxle', name: 'Transaxle', zone: 'drivetrain', anchor: [756, 475], shapes: [{ x: 712, y: 400, w: 88, h: 150 }] },
+  { id: 'battery', name: 'Battery', zone: 'engine', anchor: [834, 300], shapes: [{ x: 780, y: 255, w: 108, h: 92 }] },
 ]
 
 /** Where a hand-added slot (no zone set) shows up. */

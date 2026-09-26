@@ -23,17 +23,8 @@
   --car-stroke: #2b2925;
   --glass: #cfd6dc;
   --tire: #2a2724;
-  /* Parts map */
+  /* Parts map line art: inverted in dark mode */
   --lineart-filter: none;
-  --bay-body: #efebe4;
-  --bay-floor: #e6e1d8;
-  --bay-floor-line: #b9b2a6;
-  --bay-part: #d9d4ca;
-  --bay-intake: #cfc8bc;
-  --bay-turbo: #8c857a;
-  --bay-edge: #6f6a62;
-  --bay-dark: #3a3733;
-  --bay-glass: #cdd2d1;
 }
 
 /* Dark tokens apply when the OS prefers dark and the user hasn't picked light,
@@ -61,15 +52,6 @@
     --glass: #3a4148;
     --tire: #0b0b0a;
     --lineart-filter: invert(0.92) hue-rotate(180deg);
-    --bay-body: #262522;
-    --bay-floor: #1f1e1c;
-    --bay-floor-line: #45423d;
-    --bay-part: #3a3834;
-    --bay-intake: #45423d;
-    --bay-turbo: #6f6a62;
-    --bay-edge: #a39e93;
-    --bay-dark: #0e0e0d;
-    --bay-glass: #2d3336;
   }
 }
 
@@ -95,15 +77,6 @@
   --glass: #3a4148;
   --tire: #0b0b0a;
   --lineart-filter: invert(0.92) hue-rotate(180deg);
-  --bay-body: #262522;
-  --bay-floor: #1f1e1c;
-  --bay-floor-line: #45423d;
-  --bay-part: #3a3834;
-  --bay-intake: #45423d;
-  --bay-turbo: #6f6a62;
-  --bay-edge: #a39e93;
-  --bay-dark: #0e0e0d;
-  --bay-glass: #2d3336;
 }
 
 @theme inline {

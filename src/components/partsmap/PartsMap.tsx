@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from 'react'
 import { ArrowRight, ChevronLeft, ChevronRight, TriangleAlert } from 'lucide-react'
 import { progressOf, type MapSlot, type Progress } from '@/lib/partsmap/stats'
-import { BAY, BAY_BY_ID, BAY_VIEWBOX, LINEART, SIDE_VIEWBOX, ZONES, ZONE_BY_ID, zoneOf, type BayId, type Shape as ShapeData, type ZoneId } from '@/lib/partsmap/zones'
+import { BAY, BAY_BY_ID, BAY_LINEART, BAY_VIEWBOX, LINEART, SIDE_VIEWBOX, ZONES, ZONE_BY_ID, zoneOf, type BayId, type Shape as ShapeData, type ZoneId } from '@/lib/partsmap/zones'
 import type { PartStatus } from './actions'
 import { PartDetailPanel } from './PartDetailPanel'
 import { Shape } from './Shape'
@@ -85,7 +85,7 @@ export function PartsMap({ slots: initial, statuses: initialStatuses }: { slots:
               </button>
             ))}
           </div>
-          <span className="hidden text-xs text-muted sm:inline">{view === 'side' ? 'Front on the right' : 'Front at the top'}</span>
+          <span className="hidden text-xs text-muted sm:inline">{view === 'side' ? 'Front on the right' : 'Hood up, front at the bottom'}</span>
         </div>
 
         {view === 'side' ? (
@@ -134,7 +134,7 @@ export function PartsMap({ slots: initial, statuses: initialStatuses }: { slots:
                             ? `color-mix(in srgb, var(--accent) ${isPinned ? 16 : 9}%, transparent)`
                             : 'transparent'
                       }
-                      stroke={isActive ? 'var(--accent)' : z.id === 'drivetrain' ? 'var(--bay-turbo)' : 'transparent'}
+                      stroke={isActive ? 'var(--accent)' : z.id === 'drivetrain' ? 'var(--zone-line)' : 'transparent'}
                       strokeWidth={isActive ? (z.kind === 'part' ? 3 : 2) : 1.5}
                       strokeDasharray={z.id === 'drivetrain' && !isActive ? '6 4' : undefined}
                     />
@@ -158,13 +158,12 @@ export function PartsMap({ slots: initial, statuses: initialStatuses }: { slots:
             badges={BAY.map((b) => ({ key: b.id, anchor: b.anchor, progress: progressOf(byBay.get(b.id) ?? []), dim: !!active && !(active.kind === 'bay' && active.id === b.id) }))}
             tooltip={mouse && hover?.kind === 'bay' ? { anchor: BAY_BY_ID.get(hover.id)!.anchor, title: BAY_BY_ID.get(hover.id)!.name, progress: progressOf(byBay.get(hover.id) ?? []) } : null}
           >
-            <BayBackdrop />
+            <image href={BAY_LINEART.href} x={0} y={0} width={BAY_LINEART.width} height={BAY_LINEART.height} pointerEvents="none" style={{ filter: 'var(--lineart-filter)' }} />
+            {active?.kind === 'bay' && <Veil id={`${uid}-bay`} viewBox={BAY_VIEWBOX} holes={BAY_BY_ID.get(active.id)!.shapes} />}
             {BAY.map((b) => {
               const isActive = active?.kind === 'bay' && active.id === b.id
               const isPinned = pinned?.kind === 'bay' && pinned.id === b.id
-              const dim = !!active && !isActive
               const p = progressOf(byBay.get(b.id) ?? [])
-              const fill = b.tone === 'turbo' ? 'var(--bay-turbo)' : b.tone === 'intake' ? 'var(--bay-intake)' : b.tone === 'battery' ? 'var(--bay-dark)' : 'var(--bay-part)'
               return (
                 <g
                   key={b.id}
@@ -177,26 +176,21 @@ export function PartsMap({ slots: initial, statuses: initialStatuses }: { slots:
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), togglePin({ kind: 'bay', id: b.id }))}
                   onFocus={() => setHover({ kind: 'bay', id: b.id })}
                   onBlur={() => setHover(null)}
-                  className="cursor-pointer outline-none transition-opacity"
-                  opacity={dim ? 0.5 : 1}
+                  className="cursor-pointer outline-none"
                 >
-                  {b.shapes.map((sh, i) =>
-                    b.stroke ? (
-                      <Shape key={i} shape={sh} fill="none" stroke={isActive ? 'var(--accent)' : 'var(--bay-floor-line)'} strokeWidth={10} strokeLinecap="round" />
-                    ) : (
-                      <Shape
-                        key={i}
-                        shape={sh}
-                        fill={isActive && b.tone !== 'battery' ? `color-mix(in srgb, var(--accent) ${isPinned ? 22 : 14}%, ${fill})` : fill}
-                        stroke={isActive ? 'var(--accent)' : 'var(--bay-edge)'}
-                        strokeWidth={isActive ? 3 : 1.5}
-                      />
-                    ),
-                  )}
+                  {b.shapes.map((sh, i) => (
+                    <Shape
+                      key={i}
+                      shape={sh}
+                      vectorEffect="non-scaling-stroke"
+                      fill={isActive ? `color-mix(in srgb, var(--accent) ${isPinned ? 16 : 9}%, transparent)` : 'transparent'}
+                      stroke={isActive ? 'var(--accent)' : 'transparent'}
+                      strokeWidth={2}
+                    />
+                  ))}
                 </g>
               )
             })}
-            <path d="M140 510L660 510" stroke="var(--bay-edge)" strokeWidth={2} pointerEvents="none" />
           </MapCanvas>
         )}
 
@@ -333,28 +327,6 @@ function Veil({ id, viewBox, holes }: { id: string; viewBox: ViewBox; holes: Sha
       </mask>
       <rect x={viewBox.x} y={viewBox.y} width={viewBox.width} height={viewBox.height} fill="var(--surface)" opacity={0.5} mask={`url(#${id})`} pointerEvents="none" />
     </>
-  )
-}
-
-/** Static drawing of the bay: body outline, floor, cowl, tires, strut towers. */
-function BayBackdrop() {
-  return (
-    <g pointerEvents="none">
-      <path d="M110 570L110 170C110 80 190 36 400 30C610 36 690 80 690 170L690 570" fill="var(--bay-body)" stroke="var(--car-stroke)" strokeWidth={3} />
-      <path d="M140 510L140 180C140 110 200 70 400 64C600 70 660 110 660 180L660 510Z" fill="var(--bay-floor)" stroke="var(--bay-floor-line)" strokeWidth={1.5} />
-      <rect x={112} y={524} width={576} height={46} fill="var(--bay-glass)" />
-      <g fill="var(--tire)">
-        <rect x={86} y={150} width={26} height={130} rx={8} />
-        <rect x={688} y={150} width={26} height={130} rx={8} />
-      </g>
-      <g stroke="var(--bay-turbo)" strokeWidth={2} fill="none">
-        <circle cx={164} cy={466} r={22} />
-        <circle cx={636} cy={466} r={22} />
-      </g>
-      <text x={400} y={52} textAnchor="middle" fontFamily="var(--font-jetbrains-mono), monospace" fontSize={11} letterSpacing={2} fill="var(--bay-turbo)">
-        FRONT
-      </text>
-    </g>
   )
 }
 
