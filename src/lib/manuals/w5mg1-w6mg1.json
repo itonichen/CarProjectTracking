@@ -1,7 +1,7 @@
 {
   "slug": "w5mg1-w6mg1-manual-transmission",
   "title": "W5MG1 / W6MG1 manual transmission service manual",
-  "applies_to": "AWD (VR-4 / Stealth R/T Turbo / GTO Twin Turbo) Getrag 5- and 6-speed. Clutch section is broadly useful; transmission and transfer case sections do not apply to FWD cars.",
+  "applies_to": "AWD (VR-4 / Stealth R/T Turbo / GTO Twin Turbo) Getrag 5- and 6-speed. Our cars are FWD: the clutch section is the useful part; transmission and transfer case sections do not apply.",
   "source_note": "3000GT/Stealth International (3si.org) translation of the Mitsubishi manual, plus DaimlerChrysler recall B17.",
   "figures": [
     {
@@ -17,7 +17,9 @@
       "title": "Clutch assembly: removal and installation (exploded view, torque specs)",
       "kind": "illustration",
       "template_keys": [
-        "base:clutch"
+        "base:clutch",
+        "base:clutch_release_cylinder",
+        "base:clutch_damper"
       ]
     },
     {
@@ -48,7 +50,9 @@
       "section": "Clutch",
       "title": "Clutch release cylinder: disassembly",
       "kind": "illustration",
-      "template_keys": []
+      "template_keys": [
+        "base:clutch_release_cylinder"
+      ]
     },
     {
       "key": "clutch-damper",
@@ -62,7 +66,9 @@
       "section": "Clutch",
       "title": "Clutch damper: disassembly",
       "kind": "illustration",
-      "template_keys": []
+      "template_keys": [
+        "base:clutch_damper"
+      ]
     },
     {
       "key": "cross-section-w5mg1",

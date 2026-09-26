@@ -11,6 +11,8 @@ test('DOHC NA -> TT gets TT engine, conversion and base systems', () => {
   assert.ok(keys.has('engine_6G72_DOHC_TT:pistons'))
   assert.ok(keys.has('conversion_TT:turbos'))
   assert.ok(keys.has('base:radiator'))
+  assert.ok(keys.has('base:clutch_release_cylinder'))
+  assert.ok(keys.has('base:clutch_damper'))
   assert.equal(keys.size, slots.length, 'template keys are unique')
   assert.ok(slots.every((s) => !s.needs_review))
   assert.equal(slots.find((s) => s.template_key === 'engine_6G72_DOHC_TT:valves')?.required_qty, 24)

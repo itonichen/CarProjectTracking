@@ -224,6 +224,8 @@ export const BASE_SYSTEMS: Template = {
 
     { key: 'clutch', system: 'drivetrain', subsystem: 'Clutch', name: 'Clutch kit', qty: 1, dest: 'car', notes: 'Must be rated for the target engine’s torque.' },
     { key: 'flywheel', system: 'drivetrain', subsystem: 'Clutch', name: 'Flywheel', qty: 1, dest: 'car' },
+    { key: 'clutch_release_cylinder', system: 'drivetrain', subsystem: 'Clutch', name: 'Clutch release (slave) cylinder', qty: 1, dest: 'car', notes: 'Linked diagram is from the AWD (W5MG1/W6MG1) manual; confirm the FWD part before ordering.' },
+    { key: 'clutch_damper', system: 'drivetrain', subsystem: 'Clutch', name: 'Clutch damper', qty: 1, dest: 'car', notes: 'Sits in the hydraulic line. Linked diagram is from the AWD manual; confirm the FWD part before ordering.' },
     { key: 'axles', system: 'drivetrain', subsystem: 'Axles', name: 'CV axles', qty: 2, dest: 'car', notes: 'FWD vs AWD axles differ.' },
     { key: 'trans_fluid', system: 'drivetrain', subsystem: 'Transmission', name: 'Transmission fluid', qty: 1, dest: 'car' },
 

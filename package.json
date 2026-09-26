@@ -10,7 +10,8 @@
     "test": "tsx --test 'src/**/*.test.ts'",
     "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
-    "manuals:import": "tsx scripts/manuals/import-manual.ts"
+    "manuals:import": "tsx scripts/manuals/import-manual.ts",
+    "templates:sync": "tsx scripts/sync-templates.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
