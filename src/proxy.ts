@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { devAutoLoginEmail } from '@/lib/dev-auto-login'
 
 const PUBLIC_PATHS = ['/login', '/auth', '/manifest.webmanifest', '/sw.js', ...(process.env.NODE_ENV === 'development' ? ['/dev'] : [])]
 
@@ -28,8 +29,8 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
   if (!data?.claims && !PUBLIC_PATHS.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.search = path === '/' ? '' : `?next=${encodeURIComponent(path)}`
+    url.pathname = devAutoLoginEmail() ? '/auth/auto' : '/login'
+    url.search = path === '/' ? '' : `?next=${encodeURIComponent(path + request.nextUrl.search)}`
     return NextResponse.redirect(url)
   }
   return response

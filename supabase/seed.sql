@@ -1,0 +1,2 @@
+-- SQL seed intentionally empty. Dev data comes from `npm run seed` (scripts/seed.ts),
+-- which creates auth users through the admin API.
