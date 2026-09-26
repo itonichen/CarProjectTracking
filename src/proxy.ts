@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_PATHS = ['/login', '/auth', '/manifest.webmanifest', '/sw.js']
+const PUBLIC_PATHS = ['/login', '/auth', '/manifest.webmanifest', '/sw.js', ...(process.env.NODE_ENV === 'development' ? ['/dev'] : [])]
 
 // Refreshes the Supabase session cookie on every request and sends signed-out
 // visitors to /login. Real authorization is RLS in Postgres.

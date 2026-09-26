@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
+/* Design tokens. Light first, dark via prefers-color-scheme. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --surface-2: #efede8;
+  --border: #dedad2;
+  --text: #1b1a17;
+  --muted: #6b675e;
+  --accent: #c8322b;       /* 3000GT red */
+  --accent-strong: #a8241e;
+  --accent-soft: #f7dcd9;
+  --ok: #2f7d4f;
+  --ok-soft: #dcefe3;
+  --warn: #a86400;
+  --warn-soft: #fbead0;
+  --zone-empty: #e7e3db;
+  --zone-line: #b9b3a7;
+  --car-body: #fbfaf7;
+  --car-stroke: #2b2925;
+  --glass: #cfd6dc;
+  --tire: #2b2925;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #121211;
+    --surface: #1c1b19;
+    --surface-2: #252421;
+    --border: #34322e;
+    --text: #efece6;
+    --muted: #a39e93;
+    --accent: #ef5a4f;
+    --accent-strong: #ff7a70;
+    --accent-soft: #3d1f1c;
+    --ok: #5cc486;
+    --ok-soft: #1c3326;
+    --warn: #f0a93a;
+    --warn-soft: #3a2a12;
+    --zone-empty: #3a3834;
+    --zone-line: #55524b;
+    --car-body: #1f1e1c;
+    --car-stroke: #d9d5cc;
+    --glass: #3a4148;
+    --tire: #0b0b0a;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
