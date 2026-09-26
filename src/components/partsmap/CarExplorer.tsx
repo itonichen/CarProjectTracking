@@ -16,7 +16,8 @@ import { CarMap } from './CarMap'
 // Wide card: the spec's table. Narrower card (beside the car): the bar moves
 // under the name and the count columns tighten, so names stay on one line.
 const COLS = 'grid-cols-[minmax(0,1fr)_repeat(4,52px)_16px] @min-[48rem]:grid-cols-[minmax(0,1.6fr)_repeat(4,72px)_minmax(120px,1fr)_16px]'
-const DESKTOP = '(min-width: 768px)'
+// Split view needs room for the car beside a 25rem breakdown.
+const SPLIT_MIN = '(min-width: 1024px)'
 
 /**
  * Car illustration plus the parts breakdown. Clicking a zone on the car (on
@@ -51,7 +52,7 @@ export function CarExplorer({
   }
 
   function enterSplit() {
-    if (!window.matchMedia(DESKTOP).matches) return
+    if (!window.matchMedia(SPLIT_MIN).matches) return
     setSplit(true)
     if (!sidebarCollapsed) {
       setSidebarCollapsed(true)
@@ -96,7 +97,7 @@ export function CarExplorer({
     group === 'zone' ? { onMouseEnter: () => setRowHover(id as ZoneId), onMouseLeave: () => setRowHover(null), onFocus: () => setRowHover(id as ZoneId), onBlur: () => setRowHover(null) } : {}
 
   return (
-    <div className={split ? 'grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start gap-5' : 'flex flex-col gap-5'}>
+    <div className={split ? 'grid grid-cols-[minmax(0,1fr)_25rem] items-start gap-5' : 'flex flex-col gap-5'}>
       <div className={split ? 'sticky top-6' : ''}>
         <CarMap
           slots={slots}
@@ -110,7 +111,7 @@ export function CarExplorer({
               onClick={split ? exitSplit : enterSplit}
               aria-pressed={split}
               title={split ? 'Stack the car and the breakdown' : 'Show the breakdown beside the car'}
-              className="hidden h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-[13px] font-medium text-text-2 hover:bg-surface-2 md:inline-flex"
+              className="hidden h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-[13px] font-medium text-text-2 hover:bg-surface-2 lg:inline-flex"
             >
               {split ? <Rows2 aria-hidden size={15} /> : <Columns2 aria-hidden size={15} />}
               {split ? 'Stacked' : 'Side by side'}
@@ -136,7 +137,7 @@ export function CarExplorer({
           />
         </div>
 
-        {/* Table when the card is wide enough (desktop, including beside the car) */}
+        {/* Table when the card is wide enough */}
         <div className="hidden @min-[30rem]:block">
           <div className={`grid ${COLS} gap-2 border-t border-border bg-hover px-4 py-2 text-xs text-muted @min-[48rem]:gap-3`}>
             <span>Name</span>
@@ -176,13 +177,14 @@ export function CarExplorer({
           ))}
         </div>
 
-        {/* Rows on narrow cards (phones) */}
+        {/* Rows on narrow cards: phones, and beside the car in split view */}
         <div className="@min-[30rem]:hidden">
           {rows.map((r) => (
             <Link
               key={r.id}
               href={href(r.id)}
               data-row={r.id}
+              {...hoverProps(r.id)}
               className={`flex min-h-14 flex-col gap-[7px] border-t border-divider px-4 py-[13px] transition-colors ${isPicked(r.id) ? 'bg-accent-soft' : ''}`}
             >
               <span className="flex items-center gap-2">
