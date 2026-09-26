@@ -2,6 +2,7 @@
 
 /* Design tokens. Light first, dark via prefers-color-scheme. */
 :root {
+  color-scheme: light;
   --bg: #f6f5f2;
   --surface: #ffffff;
   --surface-2: #efede8;
@@ -23,8 +24,11 @@
   --tire: #2b2925;
 }
 
+/* Dark tokens apply when the OS prefers dark and the user hasn't picked light,
+   or when the user picked dark. Keep the two blocks identical. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #121211;
     --surface: #1c1b19;
     --surface-2: #252421;
@@ -44,7 +48,32 @@
     --car-stroke: #d9d5cc;
     --glass: #3a4148;
     --tire: #0b0b0a;
+  
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+    --bg: #121211;
+    --surface: #1c1b19;
+    --surface-2: #252421;
+    --border: #34322e;
+    --text: #efece6;
+    --muted: #a39e93;
+    --accent: #ef5a4f;
+    --accent-strong: #ff7a70;
+    --accent-soft: #3d1f1c;
+    --ok: #5cc486;
+    --ok-soft: #1c3326;
+    --warn: #f0a93a;
+    --warn-soft: #3a2a12;
+    --zone-empty: #3a3834;
+    --zone-line: #55524b;
+    --car-body: #1f1e1c;
+    --car-stroke: #d9d5cc;
+    --glass: #3a4148;
+    --tire: #0b0b0a;
+  
 }
 
 @theme inline {

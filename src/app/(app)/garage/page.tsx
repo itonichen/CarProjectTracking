@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Plus, Wrench } from 'lucide-react'
 import { CarDiagram } from '@/components/diagram/CarDiagram'
@@ -6,6 +7,8 @@ import { CarCardHeader } from '@/components/garage/CarCardHeader'
 import { EngineBadges } from '@/components/ui/EngineBadges'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { THEME_COOKIE, parseTheme } from '@/lib/theme'
 import { formatCents } from '@/lib/money'
 import { listCars } from '@/lib/queries'
 
@@ -13,6 +16,7 @@ export const metadata: Metadata = { title: 'Garage' }
 
 export default async function GaragePage() {
   const cars = await listCars()
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value)
 
   return (
     <div>
@@ -20,10 +24,15 @@ export default async function GaragePage() {
         title="Garage"
         subtitle={cars.length ? `${cars.length} ${cars.length === 1 ? 'car' : 'cars'}` : undefined}
         action={
-          <Link href="/cars/new" className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium">
-            <Plus aria-hidden size={16} />
-            Add car
-          </Link>
+          <div className="flex items-center gap-2">
+            <div className="md:hidden">
+              <ThemeToggle initial={theme} compact />
+            </div>
+            <Link href="/cars/new" className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium">
+              <Plus aria-hidden size={16} />
+              Add car
+            </Link>
+          </div>
         }
       />
       <div className="px-4 py-4 md:px-8">

@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FileUp, Settings } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import type { Theme } from '@/lib/theme'
 import { NAV_ITEMS, type NavItem } from './nav-items'
 
 function isActive(pathname: string, href: string) {
@@ -11,7 +13,7 @@ function isActive(pathname: string, href: string) {
 }
 
 /** Sidebar on md+ screens. */
-export function Sidebar() {
+export function Sidebar({ theme }: { theme: Theme }) {
   const pathname = usePathname()
   const extra: NavItem[] = [
     { href: '/import', label: 'Import', icon: FileUp },
@@ -36,6 +38,9 @@ export function Sidebar() {
           </Link>
         )
       })}
+      <div className="mt-auto px-3 pt-4">
+        <ThemeToggle initial={theme} compact />
+      </div>
     </nav>
   )
 }
