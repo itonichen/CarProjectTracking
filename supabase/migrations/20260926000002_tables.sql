@@ -119,8 +119,9 @@ create table public.acquisitions (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   unique (id, household_id),
-  -- restrict: reassign or delete a car's purchases before deleting the car
-  foreign key (car_id, household_id) references public.cars(id, household_id) on delete restrict,
+  -- a car with purchases cannot be deleted on its own (reassign them first);
+  -- "no action" is checked at end of statement so a household delete still cascades
+  foreign key (car_id, household_id) references public.cars(id, household_id) on delete no action,
   -- a slot link must be a slot on the same car
   foreign key (slot_id, car_id) references public.part_slots(id, car_id) on delete set null (slot_id),
   -- rolling back an import deletes its rows
