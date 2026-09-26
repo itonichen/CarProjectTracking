@@ -47,3 +47,6 @@ export const carBasicsSchema = z.object({
   trim: optionalText(40),
   color: optionalText(40),
 })
+
+/** Renaming a car from its page title. */
+export const carNameSchema = carBasicsSchema.pick({ id: true, nickname: true })

@@ -23,3 +23,11 @@ test('dollars to cents', () => {
   assert.equal(parseDollarsToCents('12.345'), null)
   assert.equal(parseDollarsToCents('-5'), null)
 })
+
+test('car name: trimmed, required, max 60', async () => {
+  const { carNameSchema } = await import('./car')
+  const id = '11111111-1111-4111-8111-111111111111'
+  assert.equal(carNameSchema.parse({ id, nickname: "  Dad's 3000 GT " }).nickname, "Dad's 3000 GT")
+  assert.equal(carNameSchema.safeParse({ id, nickname: '   ' }).success, false)
+  assert.equal(carNameSchema.safeParse({ id, nickname: 'x'.repeat(61) }).success, false)
+})

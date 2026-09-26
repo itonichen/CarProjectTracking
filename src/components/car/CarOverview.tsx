@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CarExplorer } from '@/components/partsmap/CarExplorer'
 import { CarPageFrame } from './CarPageFrame'
+import { CarTitle } from './CarTitle'
 import { BucketLegend, StackedBar } from '@/components/ui/StackedBar'
 import { ENGINE_LABELS, GENERATION_INFO, SYSTEM_LABELS, SYSTEMS, type EngineVariant, type Generation } from '@/lib/domain'
 import { countBuckets, type StatusInfo } from '@/lib/partsmap/buckets'
@@ -68,7 +69,7 @@ export function CarOverview({
           Garage
         </Link>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-          <h1 className="text-[26px] leading-[1.1] font-semibold tracking-[-0.02em] md:text-[34px]">{car.nickname}</h1>
+          <CarTitle key={`${car.id}:${car.nickname}`} carId={car.id} nickname={car.nickname} />
           <div className="flex flex-wrap gap-1.5 text-[13px]">
             <span className="rounded-md bg-chip px-2 py-1">
               {car.year} · {GENERATION_INFO[car.generation].short}
