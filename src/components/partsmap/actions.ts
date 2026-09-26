@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { BUILD_STATUSES, type BuildStatus, type LocationStatus, type PaymentMethod } from '@/lib/domain'
 import { requireHousehold } from '@/lib/session'
 
-export type PartStatus = { id: string; label: string; category: BuildStatus; sort_order: number }
+export type PartStatus = { id: string; label: string; category: BuildStatus; sort_order: number; at_builder: boolean }
 
 export type PartDetail = {
   slot: {
@@ -37,46 +37,9 @@ export type PartDetail = {
 
 export async function getPartStatuses(): Promise<PartStatus[]> {
   const { supabase } = await requireHousehold()
-  const { data, error } = await supabase.from('part_statuses').select('id, label, category, sort_order').order('sort_order')
+  const { data, error } = await supabase.from('part_statuses').select('id, label, category, sort_order, at_builder').order('sort_order')
   if (error) throw error
   return data as PartStatus[]
-}
-
-export async function getPartDetail(slotId: string): Promise<PartDetail | null> {
-  if (!z.uuid().safeParse(slotId).success) return null
-  const { supabase } = await requireHousehold()
-  const [slot, acq, unassigned] = await Promise.all([
-    supabase
-      .from('slot_progress')
-      .select('id, car_id, name, notes, fitment_notes, status_id, build_status, required_qty, have_qty, needs_review')
-      .eq('id', slotId)
-      .maybeSingle(),
-    supabase
-      .from('acquisitions')
-      .select('id, title, seller_name, price_cents, shipping_cents, purchased_at, location_status, payment_allocations(amount_cents, payment:payments(id, method, paid_at, counterparty, memo))')
-      .eq('slot_id', slotId)
-      .order('purchased_at', { ascending: false }),
-    supabase
-      .from('payment_matching')
-      .select('id, method, paid_at, counterparty, memo, unallocated_cents')
-      .gt('unallocated_cents', 0)
-      .order('paid_at', { ascending: false }),
-  ])
-  if (slot.error) throw slot.error
-  if (!slot.data) return null
-  type AcqRow = Omit<PartDetail['purchases'][number], 'payments' | 'payment_state'> & {
-    payment_allocations: { amount_cents: number; payment: Omit<PartDetail['purchases'][number]['payments'][number], 'amount_cents'> }[]
-  }
-  const purchases = ((acq.data ?? []) as unknown as AcqRow[]).map(({ payment_allocations, ...a }) => {
-    const paid = payment_allocations.reduce((n, p) => n + p.amount_cents, 0)
-    const cost = a.price_cents + a.shipping_cents
-    return {
-      ...a,
-      payment_state: (paid === 0 ? 'unpaid' : paid < cost ? 'partial' : 'paid') as 'unpaid' | 'partial' | 'paid',
-      payments: payment_allocations.map((p) => ({ ...p.payment, amount_cents: p.amount_cents })),
-    }
-  })
-  return { slot: slot.data as PartDetail['slot'], purchases, unassigned: (unassigned.data ?? []) as PartDetail['unassigned'] }
 }
 
 export async function setPartStatus(slotId: string, statusId: string): Promise<{ ok: boolean }> {
@@ -102,7 +65,7 @@ export async function addPartStatus(input: z.input<typeof newStatusSchema>): Pro
   const { data, error } = await supabase
     .from('part_statuses')
     .insert({ ...parsed.data, household_id: householdId, sort_order: (last?.sort_order ?? 0) + 10 })
-    .select('id, label, category, sort_order')
+    .select('id, label, category, sort_order, at_builder')
     .single()
   if (error) return { error: error.message.includes('unique') ? 'That status already exists.' : error.message }
   return { status: data as PartStatus }

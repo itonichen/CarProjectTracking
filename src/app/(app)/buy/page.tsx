@@ -22,7 +22,8 @@ type Row = {
   status_id: string | null
 }
 
-export default async function BuyPage() {
+export default async function BuyPage(props: PageProps<'/buy'>) {
+  const { car } = await props.searchParams
   const { supabase } = await requireHousehold()
   const [rows, statuses, cars] = await Promise.all([
     supabase
@@ -39,7 +40,7 @@ export default async function BuyPage() {
     <div>
       <PageHeader title="Buy list" subtitle="Every part still needed, across all cars" />
       <div className="mx-auto max-w-3xl px-4 py-4 md:px-8">
-        <BuyList items={items} cars={cars.data ?? []} />
+        <BuyList items={items} cars={cars.data ?? []} initialCar={typeof car === 'string' && (cars.data ?? []).some((c) => c.id === car) ? car : 'all'} />
       </div>
     </div>
   )

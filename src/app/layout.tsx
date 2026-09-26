@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import { cookies } from 'next/headers'
-import { Instrument_Sans, JetBrains_Mono } from 'next/font/google'
+import { Geist, Geist_Mono } from 'next/font/google'
 import { THEME_COOKIE, parseTheme } from '@/lib/theme'
 import './globals.css'
 
-const instrumentSans = Instrument_Sans({ variable: '--font-instrument-sans', subsets: ['latin'] })
-const jetbrainsMono = JetBrains_Mono({ variable: '--font-jetbrains-mono', subsets: ['latin'] })
+const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
+const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: { default: 'Garage', template: '%s · Garage' },
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f4f0' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f3ef' },
     { media: '(prefers-color-scheme: dark)', color: '#121211' },
   ],
 }
@@ -29,7 +29,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
     <html
       lang="en"
       data-theme={theme === 'system' ? undefined : theme}
-      className={`${instrumentSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>

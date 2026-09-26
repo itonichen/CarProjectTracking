@@ -21,11 +21,12 @@ import { formatCents } from '@/lib/money'
 import { requireHousehold } from '@/lib/session'
 import { signedUrls } from '@/lib/storage'
 import { setBuildStatus } from '../actions'
-import { getPartStatuses } from '@/components/partsmap/actions'
+import { getPartStatuses, type PartDetail } from '@/components/partsmap/actions'
 import { AddPurchaseButton } from './AddPurchaseButton'
 import { LocationSelect } from './LocationSelect'
 import { PhotoUpload } from './PhotoUpload'
 import { SlotDetailsForm } from './SlotDetailsForm'
+import { SlotLinkPayment, SlotNotes } from './SlotExtras'
 import { SlotStatusPicker } from './SlotStatusPicker'
 
 export const metadata: Metadata = { title: 'Part' }
@@ -43,6 +44,7 @@ type Slot = {
   destination: Destination
   build_status: BuildStatus
   status_id: string | null
+  notes: string | null
   needs_review: boolean
   template_key: string | null
 }
@@ -77,7 +79,7 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
 
   const slotRes = await supabase
     .from('slot_progress')
-    .select('id, car_id, system, subsystem, name, required_qty, have_qty, fitment_notes, fits_years, destination, build_status, status_id, needs_review, template_key')
+    .select('id, car_id, system, subsystem, name, required_qty, have_qty, fitment_notes, fits_years, destination, build_status, status_id, notes, needs_review, template_key')
     .eq('id', slotId)
     .maybeSingle()
   if (slotRes.error) throw slotRes.error
@@ -103,7 +105,7 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
   const acqIds = acquisitions.map((a) => a.id)
   const figures = ((figRes.data ?? []) as unknown as FigureLink[]).map((l) => l.figure)
 
-  const [moneyRes, eventsRes, attRes] = await Promise.all([
+  const [moneyRes, eventsRes, attRes, unassignedRes] = await Promise.all([
     supabase.from('acquisition_money').select('acquisition_id, cost_cents, allocated_cents, payment_state').in('acquisition_id', acqIds),
     supabase.from('acquisition_location_events').select('acquisition_id, from_status, to_status, changed_at').in('acquisition_id', acqIds).order('changed_at'),
     supabase
@@ -111,6 +113,11 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
       .select('id, entity_type, entity_id, storage_path, caption')
       .or(`and(entity_type.eq.slot,entity_id.eq.${slotId}),and(entity_type.eq.acquisition,entity_id.in.(${acqIds.join(',') || '00000000-0000-0000-0000-000000000000'}))`)
       .order('created_at'),
+    supabase
+      .from('payment_matching')
+      .select('id, method, paid_at, counterparty, memo, unallocated_cents')
+      .gt('unallocated_cents', 0)
+      .order('paid_at', { ascending: false }),
   ])
   const money = new Map(((moneyRes.data ?? []) as Money[]).map((m) => [m.acquisition_id, m]))
   const events = (eventsRes.data ?? []) as LocationEvent[]
@@ -170,10 +177,14 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
           )}
         </section>
 
+        <section aria-label="Notes" className="rounded-2xl border border-border bg-surface p-4">
+          <SlotNotes slotId={slot.id} notes={slot.notes} />
+        </section>
+
         {/* Purchases */}
         <section aria-labelledby="purchases-h">
           <div className="mb-2 flex items-center justify-between">
-            <h2 id="purchases-h" className="text-sm font-semibold text-muted">Purchases</h2>
+            <h2 id="purchases-h" className="text-sm font-semibold text-muted">Invoices & payments</h2>
             <AddPurchaseButton carId={car.id} slotId={slot.id} />
           </div>
           {acquisitions.length === 0 ? (
@@ -224,6 +235,10 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
               })}
             </ul>
           )}
+        </section>
+
+        <section aria-label="Link a payment" className="rounded-2xl border border-border bg-surface p-4">
+          <SlotLinkPayment slotId={slot.id} unassigned={(unassignedRes.data ?? []) as PartDetail['unassigned']} />
         </section>
 
         {/* Diagrams from manuals */}

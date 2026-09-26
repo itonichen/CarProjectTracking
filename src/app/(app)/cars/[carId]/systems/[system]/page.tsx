@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { GroupSummary } from '@/components/car/GroupSummary'
 import { SystemParts } from '@/components/car/SystemParts'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { EngineBadges } from '@/components/ui/EngineBadges'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { SYSTEMS, SYSTEM_LABELS, type CarSystem } from '@/lib/domain'
+import { countByBucket } from '@/lib/partsmap/buckets'
 import { getCar, getSystemSlots } from '@/lib/queries'
 
 export async function generateMetadata(props: PageProps<'/cars/[carId]/systems/[system]'>): Promise<Metadata> {
@@ -18,6 +20,7 @@ export default async function SystemPage(props: PageProps<'/cars/[carId]/systems
   const [data, slots] = await Promise.all([getCar(carId), getSystemSlots(carId, system as CarSystem)])
   if (!data) notFound()
   const { car } = data
+  const counts = countByBucket(slots)
 
   return (
     <div>
@@ -26,7 +29,8 @@ export default async function SystemPage(props: PageProps<'/cars/[carId]/systems
         subtitle={<EngineBadges year={car.year} generation={car.generation} original={car.original_engine_variant} target={car.target_engine_variant} />}
         back={{ href: `/cars/${car.id}`, label: car.nickname }}
       />
-      <div className="px-4 py-4 md:px-8">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 md:px-8">
+        {slots.length > 0 && <GroupSummary name={SYSTEM_LABELS[system as CarSystem]} counts={counts} />}
         {slots.length === 0 ? (
           <EmptyState title="No parts in this system yet">Slots come from the templates when a car is added. You can add slots by hand from here soon.</EmptyState>
         ) : (

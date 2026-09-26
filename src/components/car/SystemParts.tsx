@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Car as CarIcon, ChevronRight, TriangleAlert, Wrench } from 'lucide-react'
+import { StatusDot } from '@/components/partsmap/StatusDot'
 import { formatYearRange, parseYearRange, type BuildStatus, type Destination } from '@/lib/domain'
+import type { Bucket } from '@/lib/partsmap/buckets'
 
 export type SlotListItem = {
   id: string
@@ -10,17 +12,11 @@ export type SlotListItem = {
   have_qty: number
   build_status: BuildStatus
   status_label?: string | null
+  bucket?: Bucket
   destination: Destination
   needs_review: boolean
   fitment_notes: string | null
   fits_years: string | null
-}
-
-const STATUS_STYLE: Record<BuildStatus, string> = {
-  needed: 'bg-surface-2 text-muted',
-  sourcing: 'bg-warn-soft text-warn',
-  have: 'bg-accent-soft text-accent-strong',
-  installed: 'bg-ok-soft text-ok',
 }
 
 const STATUS_LABEL: Record<BuildStatus, string> = {
@@ -30,8 +26,14 @@ const STATUS_LABEL: Record<BuildStatus, string> = {
   installed: 'Installed',
 }
 
-export function StatusPill({ status, label }: { status: BuildStatus; label?: string | null }) {
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[status]}`}>{label ?? STATUS_LABEL[status]}</span>
+/** The part's household status with its bucket colour. */
+export function StatusPill({ status, label, bucket }: { status: BuildStatus; label?: string | null; bucket?: Bucket }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-chip px-2 py-0.5 text-xs font-medium">
+      <StatusDot bucket={bucket ?? (status === 'installed' ? 'built' : status === 'have' ? 'bought' : 'need')} size={8} />
+      {label ?? STATUS_LABEL[status]}
+    </span>
+  )
 }
 
 export function DestinationTag({ destination }: { destination: Destination }) {
@@ -79,11 +81,11 @@ export function SystemParts({ slots, slotHref }: { slots: SlotListItem[]; slotHr
                         <QtyMeter have={qtyDone} required={s.required_qty} />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="truncate font-medium">{s.name}</span>
+                            <span className="line-clamp-2 font-medium">{s.name}</span>
                             {s.needs_review && <TriangleAlert aria-label="Needs review" size={14} className="shrink-0 text-warn" />}
                           </div>
                           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <StatusPill status={s.build_status} label={s.status_label} />
+                            <StatusPill status={s.build_status} label={s.status_label} bucket={s.bucket} />
                             <DestinationTag destination={s.destination} />
                             {range && <span className="text-xs text-muted">{formatYearRange(range)}</span>}
                           </div>

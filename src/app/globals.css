@@ -3,26 +3,32 @@
 /* Design tokens. Light first, dark via prefers-color-scheme. */
 :root {
   color-scheme: light;
-  /* Palette from the parts-map design handoff. */
-  --bg: #f5f4f0;
+  /* Palette from the car-detail 1c handoff. */
+  --bg: #f4f3ef;
   --surface: #ffffff;
-  --surface-2: #efede8;
-  --border: #e4e1da;
-  --text: #1f1d1a;
-  --muted: #6f6a62;
-  --accent: #b8322a;       /* 3000GT red; also "needed" */
-  --accent-strong: #9a2821;
-  --accent-soft: #f5dfdc;
+  --surface-2: #f0ede7;   /* segmented track, subtle fills */
+  --border: #e7e3dc;      /* card borders */
+  --divider: #f0ede7;     /* row dividers */
+  --hover: #faf9f6;       /* row hover, table header */
+  --chip: #ebe8e2;
+  --track: #ebe8e2;       /* progress bar track */
+  --text: #1f1e1b;
+  --text-2: #4d4a44;
+  --muted: #6f6b64;
+  --faint: #a19c93;
+  --accent: #b8322a;
+  --accent-strong: #8f241e;
+  --accent-soft: #f3dcd9;
   --ok: #2f7d4f;
   --ok-soft: #dcefe3;
-  --warn: #a86400;
-  --warn-soft: #fbead0;
-  --zone-empty: #e7e3db;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
   --zone-line: #b9b3a7;
-  --car-body: #fbfaf7;
-  --car-stroke: #2b2925;
-  --glass: #cfd6dc;
-  --tire: #2a2724;
+  /* Part status buckets */
+  --st-built: #1f1e1b;
+  --st-shipped: #8c877e;
+  --st-bought: #d3cdc2;
+  --st-need: #e7aaa3;
   /* Parts map line art: inverted in dark mode */
   --lineart-filter: none;
 }
@@ -34,10 +40,16 @@
     color-scheme: dark;
     --bg: #121211;
     --surface: #1c1b19;
-    --surface-2: #252421;
+    --surface-2: #26241f;
     --border: #34322e;
+    --divider: #2a2825;
+    --hover: #232220;
+    --chip: #2a2825;
+    --track: #2e2c28;
     --text: #efece6;
+    --text-2: #c9c4ba;
     --muted: #a39e93;
+    --faint: #77736b;
     --accent: #ef5a4f;
     --accent-strong: #ff7a70;
     --accent-soft: #3d1f1c;
@@ -45,12 +57,11 @@
     --ok-soft: #1c3326;
     --warn: #f0a93a;
     --warn-soft: #3a2a12;
-    --zone-empty: #3a3834;
     --zone-line: #55524b;
-    --car-body: #1f1e1c;
-    --car-stroke: #d9d5cc;
-    --glass: #3a4148;
-    --tire: #0b0b0a;
+    --st-built: #efece6;
+    --st-shipped: #9a958b;
+    --st-bought: #5c5850;
+    --st-need: #9b4a43;
     --lineart-filter: invert(0.92) hue-rotate(180deg);
   }
 }
@@ -59,10 +70,16 @@
   color-scheme: dark;
   --bg: #121211;
   --surface: #1c1b19;
-  --surface-2: #252421;
+  --surface-2: #26241f;
   --border: #34322e;
+  --divider: #2a2825;
+  --hover: #232220;
+  --chip: #2a2825;
+  --track: #2e2c28;
   --text: #efece6;
+  --text-2: #c9c4ba;
   --muted: #a39e93;
+  --faint: #77736b;
   --accent: #ef5a4f;
   --accent-strong: #ff7a70;
   --accent-soft: #3d1f1c;
@@ -70,12 +87,11 @@
   --ok-soft: #1c3326;
   --warn: #f0a93a;
   --warn-soft: #3a2a12;
-  --zone-empty: #3a3834;
   --zone-line: #55524b;
-  --car-body: #1f1e1c;
-  --car-stroke: #d9d5cc;
-  --glass: #3a4148;
-  --tire: #0b0b0a;
+  --st-built: #efece6;
+  --st-shipped: #9a958b;
+  --st-bought: #5c5850;
+  --st-need: #9b4a43;
   --lineart-filter: invert(0.92) hue-rotate(180deg);
 }
 
@@ -84,8 +100,14 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--border);
+  --color-divider: var(--divider);
+  --color-hover: var(--hover);
+  --color-chip: var(--chip);
+  --color-track: var(--track);
   --color-text: var(--text);
+  --color-text-2: var(--text-2);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
@@ -93,8 +115,12 @@
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
-  --font-sans: var(--font-instrument-sans);
-  --font-mono: var(--font-jetbrains-mono);
+  --color-st-built: var(--st-built);
+  --color-st-shipped: var(--st-shipped);
+  --color-st-bought: var(--st-bought);
+  --color-st-need: var(--st-need);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 html {
@@ -104,7 +130,7 @@ html {
 }
 
 body {
-  font-family: var(--font-instrument-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 .tabular {

@@ -3,10 +3,10 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { PartStatus } from '@/components/partsmap/actions'
-import { StatusPicker } from '@/components/partsmap/PartDetailPanel'
+import { StatusPicker } from '@/components/partsmap/part-controls'
 
 export function SlotStatusPicker({ slotId, current, statuses: initial }: { slotId: string; current: string | null; statuses: PartStatus[] }) {
   const router = useRouter()
   const [statuses, setStatuses] = useState(initial)
-  return <StatusPicker slotId={slotId} current={current} statuses={statuses} onStatusesChange={setStatuses} onChange={() => setTimeout(() => router.refresh(), 400)} />
+  return <StatusPicker slotId={slotId} current={current} statuses={statuses} onStatusesChange={setStatuses} onChange={() => setTimeout(() => router.refresh(), 400)} heading={false} />
 }

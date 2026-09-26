@@ -28,8 +28,8 @@ export type BuyItem = {
 type Group = { name: string; items: BuyItem[]; qty: number }
 
 /** Open parts grouped by system, then by part, so a part several cars need reads as one line. */
-export function BuyList({ items, cars }: { items: BuyItem[]; cars: { id: string; nickname: string }[] }) {
-  const [car, setCar] = useState<string>('all')
+export function BuyList({ items, cars, initialCar = 'all' }: { items: BuyItem[]; cars: { id: string; nickname: string }[]; initialCar?: string }) {
+  const [car, setCar] = useState<string>(initialCar)
   const [query, setQuery] = useState('')
   const [hideReview, setHideReview] = useState(true)
   const [bought, setBought] = useState<Record<string, string>>({})
@@ -155,7 +155,7 @@ function CarLine({ item, showCar, onBought }: { item: BuyItem; showCar: boolean;
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl bg-bg px-3 py-2">
       <Link href={`/slots/${item.slot_id}`} className="flex min-w-0 flex-1 items-center gap-2 text-sm hover:underline">
-        <StatusDot status={item.build_status} size={10} />
+        <StatusDot bucket="need" size={10} />
         <span className="truncate">
           {showCar && <span className="font-medium">{item.car_nickname} · </span>}
           {item.status_label ?? item.build_status}

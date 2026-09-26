@@ -1,15 +1,21 @@
 import 'server-only'
-import type { SystemRow, CarOverviewData } from '@/components/car/CarOverview'
+import type { CarOverviewData } from '@/components/car/CarOverview'
 import type { SlotListItem } from '@/components/car/SystemParts'
 import type { CarSystem } from './domain'
 import { progressOf, type MapSlot, type Progress } from './partsmap/stats'
-import { zoneOf, type ZoneId } from './partsmap/zones'
+import { bucketOf, type StatusInfo } from './partsmap/buckets'
+import { BAY_BY_ID, zoneOf, type BayId, type ZoneId } from './partsmap/zones'
 import { requireHousehold } from './session'
 
 // TODO: replace these hand-written row types with `npm run db:types` output
 // once the local database is running.
 
 export type CarSummary = CarOverviewData & {
+  trim: string | null
+  budget_cents: number
+  spent_cents: number
+  open_slots: number
+  at_builder_count: number
   color: string | null
   total_slots: number
 }
@@ -17,22 +23,14 @@ export type CarSummary = CarOverviewData & {
 const CAR_SUMMARY_COLUMNS =
   'id, nickname, year, generation, trim, color, original_engine_variant, target_engine_variant, budget_cents, spent_cents, open_slots, total_slots, at_builder_count'
 
-type ProgressRow = { car_id: string; system: CarSystem; total_slots: number; done_slots: number; open_slots: number; review_slots: number }
-
-const toSystemRow = (r: ProgressRow): SystemRow => ({ system: r.system, total: r.total_slots, done: r.done_slots, open: r.open_slots, review: r.review_slots })
-
 export async function listCars() {
   const { supabase } = await requireHousehold()
-  const [cars, progress, slots] = await Promise.all([
+  const [cars, slots] = await Promise.all([
     supabase.from('car_summary').select(CAR_SUMMARY_COLUMNS).order('created_at'),
-    supabase.from('car_system_progress').select('car_id, system, total_slots, done_slots, open_slots, review_slots'),
     supabase.from('part_slots').select('car_id, zone, system, build_status'),
   ])
   if (cars.error) throw cars.error
-  if (progress.error) throw progress.error
   if (slots.error) throw slots.error
-  const bySystem = new Map<string, SystemRow[]>()
-  for (const r of progress.data as ProgressRow[]) bySystem.set(r.car_id, [...(bySystem.get(r.car_id) ?? []), toSystemRow(r)])
   // Zone progress for the garage-card thumbnails.
   type ZoneSlot = Pick<MapSlot, 'zone' | 'system' | 'build_status'> & { car_id: string }
   const zoneSlots = new Map<string, Map<ZoneId, ZoneSlot[]>>()
@@ -44,7 +42,6 @@ export async function listCars() {
   }
   return (cars.data as CarSummary[]).map((car) => ({
     car,
-    systems: bySystem.get(car.id) ?? [],
     zones: Object.fromEntries([...(zoneSlots.get(car.id) ?? [])].map(([z, list]) => [z, progressOf(list)])) as Partial<Record<ZoneId, Progress>>,
   }))
 }
@@ -63,28 +60,40 @@ export async function getCarSlots(carId: string) {
 
 export async function getCar(carId: string) {
   const { supabase } = await requireHousehold()
-  const [car, progress] = await Promise.all([
-    supabase.from('car_summary').select(CAR_SUMMARY_COLUMNS).eq('id', carId).maybeSingle(),
-    supabase.from('car_system_progress').select('car_id, system, total_slots, done_slots, open_slots, review_slots').eq('car_id', carId),
-  ])
+  const car = await supabase.from('car_summary').select(CAR_SUMMARY_COLUMNS).eq('id', carId).maybeSingle()
   if (car.error) throw car.error
-  if (progress.error) throw progress.error
   if (!car.data) return null
-  return { car: car.data as CarSummary, systems: (progress.data as ProgressRow[]).map(toSystemRow) }
+  return { car: car.data as CarSummary }
+}
+
+type ListRow = SlotListItem & { status_id: string | null; zone: string | null; bay: string | null; system: CarSystem }
+
+async function listSlots(carId: string, filter: { system?: CarSystem }) {
+  const { supabase } = await requireHousehold()
+  let q = supabase
+    .from('slot_progress')
+    .select('id, system, zone, bay, subsystem, name, required_qty, have_qty, build_status, status_id, destination, needs_review, fitment_notes, fits_years')
+    .eq('car_id', carId)
+    .order('sort_order')
+  if (filter.system) q = q.eq('system', filter.system)
+  const [slots, statuses] = await Promise.all([q, supabase.from('part_statuses').select('id, label, category, at_builder')])
+  if (slots.error) throw slots.error
+  const byId = new Map((statuses.data ?? []).map((s) => [s.id as string, s as { id: string; label: string } & StatusInfo]))
+  return (slots.data as ListRow[]).map((s) => ({
+    ...s,
+    status_label: s.status_id ? (byId.get(s.status_id)?.label ?? null) : null,
+    bucket: bucketOf(s, byId),
+  }))
 }
 
 export async function getSystemSlots(carId: string, system: CarSystem) {
-  const { supabase } = await requireHousehold()
-  const [slots, statuses] = await Promise.all([
-    supabase
-      .from('slot_progress')
-      .select('id, subsystem, name, required_qty, have_qty, build_status, status_id, destination, needs_review, fitment_notes, fits_years')
-      .eq('car_id', carId)
-      .eq('system', system)
-      .order('sort_order'),
-    supabase.from('part_statuses').select('id, label'),
-  ])
-  if (slots.error) throw slots.error
-  const label = new Map((statuses.data ?? []).map((s) => [s.id as string, s.label as string]))
-  return (slots.data as (SlotListItem & { status_id: string | null })[]).map((s) => ({ ...s, status_label: s.status_id ? label.get(s.status_id) : null }))
+  return listSlots(carId, { system })
+}
+
+/** A zone's parts. The engine zone is long, so its parts are grouped by bay component. */
+export async function getZoneSlots(carId: string, zone: ZoneId) {
+  const all = await listSlots(carId, {})
+  return all
+    .filter((s) => zoneOf(s) === zone)
+    .map((s) => ({ ...s, subsystem: zone === 'engine' && s.bay ? (BAY_BY_ID.get(s.bay as BayId)?.name ?? s.subsystem) : s.subsystem }))
 }
