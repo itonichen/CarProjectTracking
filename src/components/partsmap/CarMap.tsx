@@ -16,7 +16,23 @@ type Hot = { key: string; name: string; zone: ZoneId; anchor: [number, number]; 
  * the parts breakdown can jump to it. On phones the badges are display only
  * and the table below does the navigating.
  */
-export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; statuses: Map<string, StatusInfo>; onSelect: (zone: ZoneId) => void }) {
+export function CarMap({
+  slots,
+  statuses,
+  onSelect,
+  highlight,
+  selected,
+  toolbar,
+}: {
+  slots: MapSlot[]
+  statuses: Map<string, StatusInfo>
+  onSelect: (zone: ZoneId) => void
+  /** Zone to highlight from outside, e.g. while hovering its table row. */
+  highlight?: ZoneId | null
+  /** Zone currently picked in the breakdown. */
+  selected?: ZoneId | null
+  toolbar?: React.ReactNode
+}) {
   const uid = useId().replace(/:/g, '')
   const [view, setView] = useState<View>('side')
   const [hover, setHover] = useState<string | null>(null)
@@ -51,7 +67,13 @@ export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; status
 
   const vb = view === 'side' ? SIDE_VIEWBOX : BAY_VIEWBOX
   const art = view === 'side' ? LINEART : BAY_LINEART
-  const active = hots.find((h) => h.key === hover)
+  // Mouse hover wins, then a hovered table row, then the picked zone. In the
+  // engine bay one zone covers several components, so all of them light up.
+  const outside = highlight ?? selected
+  const litKeys = new Set(hover ? [hover] : outside ? hots.filter((h) => h.zone === outside).map((h) => h.key) : [])
+  const lit = (h: Hot) => litKeys.has(h.key)
+  const holes = hots.filter(lit).flatMap((h) => h.shapes)
+  const tip = hover ? hots.find((h) => h.key === hover) : undefined
   const pos = ([x, y]: [number, number]) => ({ left: `${((x - vb.x) / vb.width) * 100}%`, top: `${((y - vb.y) / vb.height) * 100}%` })
 
   return (
@@ -69,16 +91,19 @@ export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; status
             setHover(null)
           }}
         />
-        <span className="text-[13px] text-faint">
-          {view === 'side' ? 'Front on the right' : 'Hood up, front at the bottom'}
-          <span className="hidden md:inline"> · tap a {view === 'side' ? 'zone' : 'part'}</span>
+        <span className="flex items-center gap-3">
+          <span className="text-[13px] text-faint">
+            {view === 'side' ? 'Front on the right' : 'Hood up, front at the bottom'}
+            <span className="hidden md:inline"> · tap a {view === 'side' ? 'zone' : 'part'}</span>
+          </span>
+          {toolbar}
         </span>
       </div>
 
       <div className="relative select-none" style={{ aspectRatio: `${vb.width} / ${vb.height}` }} onPointerLeave={() => setHover(null)}>
         <svg viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`} aria-hidden className="absolute inset-0 h-full w-full" strokeLinejoin="round">
           <image href={art.href} x={0} y={0} width={art.width} height={art.height} style={{ filter: 'var(--lineart-filter)' }} />
-          {active && <Veil id={`${uid}-veil`} vb={vb} holes={active.shapes} />}
+          {holes.length > 0 && <Veil id={`${uid}-veil`} vb={vb} holes={holes} />}
           {hots.map((h) =>
             h.shapes.map((sh, i) => (
               <Shape
@@ -89,10 +114,10 @@ export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; status
                 className="pointer-events-none cursor-pointer md:pointer-events-auto"
                 onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(h.key)}
                 onClick={() => onSelect(h.zone)}
-                fill={hover === h.key && !h.outline ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : h.key === 'drivetrain' ? 'var(--surface-2)' : 'transparent'}
-                stroke={hover === h.key ? 'var(--accent)' : h.key === 'drivetrain' ? 'var(--zone-line)' : 'transparent'}
-                strokeWidth={hover === h.key ? (h.outline ? 3 : 2) : 1.5}
-                strokeDasharray={h.key === 'drivetrain' && hover !== h.key ? '6 4' : undefined}
+                fill={lit(h) && !h.outline ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : h.key === 'drivetrain' ? 'var(--surface-2)' : 'transparent'}
+                stroke={lit(h) ? 'var(--accent)' : h.key === 'drivetrain' ? 'var(--zone-line)' : 'transparent'}
+                strokeWidth={lit(h) ? (h.outline ? 3 : 2) : 1.5}
+                strokeDasharray={h.key === 'drivetrain' && !lit(h) ? '6 4' : undefined}
               />
             )),
           )}
@@ -105,7 +130,7 @@ export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; status
             const text = `${h.counts.built}/${h.counts.total}`
             const cls = `absolute -translate-x-1/2 -translate-y-1/2 rounded-full border px-1.5 font-mono text-[10px] leading-4 font-medium sm:text-[11px] ${
               done ? 'border-st-built bg-st-built text-surface' : 'border-border bg-surface text-text'
-            } ${active && active.key !== h.key ? 'opacity-50' : ''}`
+            } ${litKeys.size > 0 && !lit(h) ? 'opacity-50' : ''}`
             return (
               <span key={h.key}>
                 {/* Phones: display only. */}
@@ -128,15 +153,15 @@ export function CarMap({ slots, statuses, onSelect }: { slots: MapSlot[]; status
             )
           })}
 
-        {active && (
+        {tip && (
           <div
             role="tooltip"
-            style={{ ...pos(active.anchor), transform: 'translate(-50%, calc(-100% - 16px))' }}
+            style={{ ...pos(tip.anchor), transform: 'translate(-50%, calc(-100% - 16px))' }}
             className="pointer-events-none absolute z-10 hidden rounded-lg bg-text px-2.5 py-1.5 text-xs whitespace-nowrap text-surface shadow-lg md:block"
           >
-            <div className="font-semibold">{active.name}</div>
+            <div className="font-semibold">{tip.name}</div>
             <div className="font-mono opacity-80">
-              {active.counts.built}/{active.counts.total} built · {active.counts.need} to buy
+              {tip.counts.built}/{tip.counts.total} built · {tip.counts.need} to buy
             </div>
           </div>
         )}

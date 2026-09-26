@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CarExplorer } from '@/components/partsmap/CarExplorer'
+import { CarPageFrame } from './CarPageFrame'
 import { BucketLegend, StackedBar } from '@/components/ui/StackedBar'
 import { ENGINE_LABELS, GENERATION_INFO, SYSTEM_LABELS, SYSTEMS, type EngineVariant, type Generation } from '@/lib/domain'
 import { countBuckets, type StatusInfo } from '@/lib/partsmap/buckets'
@@ -60,7 +61,7 @@ export function CarOverview({
   ].filter(Boolean) as Action[]
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-5 px-4 pt-4 pb-6 md:px-11 md:pt-9 md:pb-14">
+    <CarPageFrame>
       <header className="flex flex-col gap-3.5">
         <Link href={backHref} className="-my-2.5 inline-flex min-h-11 w-fit items-center gap-0.5 text-sm text-muted hover:text-text md:my-0 md:min-h-6">
           <ChevronLeft aria-hidden size={16} />
@@ -117,6 +118,6 @@ export function CarOverview({
       )}
 
       <CarExplorer carId={car.id} slots={slots} statuses={statuses} initialGroup={initialGroup} />
-    </div>
+    </CarPageFrame>
   )
 }

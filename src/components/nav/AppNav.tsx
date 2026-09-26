@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRef } from 'react'
-import { Car, Ellipsis, Plus, ShoppingCart, Truck, X } from 'lucide-react'
+import { Car, Ellipsis, PanelLeftClose, PanelLeftOpen, Plus, ShoppingCart, Truck, X } from 'lucide-react'
 import { useQuickAdd } from '@/components/quick-add/QuickAddProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import type { Theme } from '@/lib/theme'
 import { MORE_HREFS, NAV_ITEMS, isActive } from './nav-items'
+import { useSidebar } from './SidebarState'
 
 const CAR_PATH = /^\/cars\/([0-9a-f-]{36})/
 
@@ -18,13 +19,50 @@ function useOpenQuickAdd() {
   return () => open({ carId: CAR_PATH.exec(pathname)?.[1] })
 }
 
-/** Sidebar on screens 768px and up. */
+/** Sidebar on screens 768px and up; collapses to an icon rail. */
 export function Sidebar({ theme }: { theme: Theme }) {
   const pathname = usePathname()
   const quickAdd = useOpenQuickAdd()
+  const { collapsed, setCollapsed } = useSidebar()
+
+  if (collapsed) {
+    return (
+      <aside aria-label="Sidebar" className="sticky top-0 hidden h-dvh w-16 shrink-0 flex-col items-center gap-4 border-r border-border py-5 md:flex">
+        <button type="button" onClick={() => setCollapsed(false)} aria-label="Expand sidebar" title="Expand sidebar" className="grid h-10 w-10 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-text">
+          <PanelLeftOpen aria-hidden size={18} />
+        </button>
+        <button type="button" onClick={quickAdd} aria-label="Quick add" title="Quick add" className="grid h-10 w-10 place-items-center rounded-[10px] bg-accent text-white hover:bg-accent-strong">
+          <Plus aria-hidden size={18} />
+        </button>
+        <nav aria-label="Main" className="flex flex-col items-center gap-1">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(pathname, href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                title={label}
+                aria-current={active ? 'page' : undefined}
+                className={`grid h-10 w-10 place-items-center rounded-lg ${active ? 'bg-accent-soft text-accent' : 'text-text-2 hover:bg-surface-2'}`}
+              >
+                <Icon aria-hidden size={18} />
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
+    )
+  }
+
   return (
-    <aside className="hidden w-[216px] shrink-0 flex-col gap-5 border-r border-border px-3.5 py-7 md:flex">
-      <div className="px-2.5 text-xs font-semibold tracking-[0.1em] text-muted">GARAGE</div>
+    <aside aria-label="Sidebar" className="sticky top-0 hidden h-dvh w-[216px] shrink-0 flex-col gap-5 border-r border-border px-3.5 py-7 md:flex">
+      <div className="flex items-center justify-between pl-2.5">
+        <span className="text-xs font-semibold tracking-[0.1em] text-muted">GARAGE</span>
+        <button type="button" onClick={() => setCollapsed(true)} aria-label="Collapse sidebar" title="Collapse sidebar" className="-my-2 grid h-8 w-8 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-text">
+          <PanelLeftClose aria-hidden size={16} />
+        </button>
+      </div>
       <button type="button" onClick={quickAdd} className="flex h-[42px] items-center justify-center gap-1.5 rounded-[10px] bg-accent text-[15px] font-medium text-white hover:bg-accent-strong">
         <Plus aria-hidden size={17} />
         Quick add

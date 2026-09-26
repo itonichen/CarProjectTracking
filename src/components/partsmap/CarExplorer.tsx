@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Columns2, Rows2 } from 'lucide-react'
+import { useSplit } from '@/components/car/CarPageFrame'
+import { useSidebar } from '@/components/nav/SidebarState'
 import { Segmented } from '@/components/ui/Segmented'
 import { StackedBar } from '@/components/ui/StackedBar'
 import type { StatusInfo } from '@/lib/partsmap/buckets'
@@ -11,9 +13,16 @@ import type { MapSlot } from '@/lib/partsmap/stats'
 import type { ZoneId } from '@/lib/partsmap/zones'
 import { CarMap } from './CarMap'
 
-const COLS = 'grid-cols-[minmax(0,1.6fr)_repeat(4,72px)_minmax(120px,1fr)_16px]'
+// Wide card: the spec's table. Narrower card (beside the car): the bar moves
+// under the name and the count columns tighten, so names stay on one line.
+const COLS = 'grid-cols-[minmax(0,1fr)_repeat(4,52px)_16px] @min-[48rem]:grid-cols-[minmax(0,1.6fr)_repeat(4,72px)_minmax(120px,1fr)_16px]'
+const DESKTOP = '(min-width: 768px)'
 
-/** Car illustration plus the parts breakdown; tapping a zone jumps the table to it. */
+/**
+ * Car illustration plus the parts breakdown. Clicking a zone on the car (on
+ * desktop) collapses the sidebar and puts the breakdown beside the car, with
+ * that zone highlighted in both.
+ */
 export function CarExplorer({
   carId,
   slots,
@@ -27,36 +36,90 @@ export function CarExplorer({
 }) {
   const statuses = useMemo(() => new Map(statusList.map((s) => [s.id, s])), [statusList])
   const [group, setGroup] = useState<Group>(initialGroup)
-  const [focus, setFocus] = useState<string | null>(null)
+  const [selected, setSelected] = useState<ZoneId | null>(null)
+  const [rowHover, setRowHover] = useState<ZoneId | null>(null)
   const rows = useMemo(() => breakdown(slots, statuses, group), [slots, statuses, group])
   const table = useRef<HTMLElement>(null)
+  const { split, setSplit } = useSplit()
+  const { collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed } = useSidebar()
+  // Only re-open the sidebar on exit if split view is what closed it.
+  const closedSidebar = useRef(false)
 
   function changeGroup(g: Group) {
     setGroup(g)
     document.cookie = `${GROUP_COOKIE}=${g}; path=/; max-age=31536000; samesite=lax`
   }
 
-  function selectZone(zone: ZoneId) {
-    if (group !== 'zone') changeGroup('zone')
-    setFocus(zone)
+  function enterSplit() {
+    if (!window.matchMedia(DESKTOP).matches) return
+    setSplit(true)
+    if (!sidebarCollapsed) {
+      setSidebarCollapsed(true)
+      closedSidebar.current = true
+    }
   }
 
-  // Scroll the chosen zone's row into view and let the highlight fade.
+  function exitSplit() {
+    setSplit(false)
+    if (closedSidebar.current) setSidebarCollapsed(false)
+    closedSidebar.current = false
+  }
+
+  function selectZone(zone: ZoneId) {
+    if (group !== 'zone') changeGroup('zone')
+    setSelected(zone)
+    enterSplit()
+  }
+
+  // Bring the picked row into view (it usually already is in split view).
   useEffect(() => {
-    if (!focus) return
-    const row = table.current?.querySelector<HTMLElement>(`[data-row="${focus}"]`)
-    row?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    const t = setTimeout(() => setFocus(null), 2400)
-    return () => clearTimeout(t)
-  }, [focus])
+    if (!selected) return
+    const id = requestAnimationFrame(() => {
+      const row = [...(table.current?.querySelectorAll<HTMLElement>(`[data-row="${selected}"]`) ?? [])].find((el) => el.offsetParent)
+      row?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [selected, split])
+
+  // Leaving the car page with split view on: give the sidebar back.
+  // (setSidebarCollapsed is a state setter, so this only runs on unmount.)
+  useEffect(
+    () => () => {
+      if (closedSidebar.current) setSidebarCollapsed(false)
+    },
+    [setSidebarCollapsed],
+  )
 
   const href = (id: string) => (group === 'zone' ? `/cars/${carId}/zones/${id}` : `/cars/${carId}/systems/${id}`)
+  const isPicked = (id: string) => group === 'zone' && selected === id
+  const hoverProps = (id: string) =>
+    group === 'zone' ? { onMouseEnter: () => setRowHover(id as ZoneId), onMouseLeave: () => setRowHover(null), onFocus: () => setRowHover(id as ZoneId), onBlur: () => setRowHover(null) } : {}
 
   return (
-    <>
-      <CarMap slots={slots} statuses={statuses} onSelect={selectZone} />
+    <div className={split ? 'grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start gap-5' : 'flex flex-col gap-5'}>
+      <div className={split ? 'sticky top-6' : ''}>
+        <CarMap
+          slots={slots}
+          statuses={statuses}
+          onSelect={selectZone}
+          highlight={rowHover}
+          selected={selected}
+          toolbar={
+            <button
+              type="button"
+              onClick={split ? exitSplit : enterSplit}
+              aria-pressed={split}
+              title={split ? 'Stack the car and the breakdown' : 'Show the breakdown beside the car'}
+              className="hidden h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-[13px] font-medium text-text-2 hover:bg-surface-2 md:inline-flex"
+            >
+              {split ? <Rows2 aria-hidden size={15} /> : <Columns2 aria-hidden size={15} />}
+              {split ? 'Stacked' : 'Side by side'}
+            </button>
+          }
+        />
+      </div>
 
-      <section ref={table} aria-labelledby="breakdown-h" className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <section ref={table} aria-labelledby="breakdown-h" className="@container overflow-hidden rounded-2xl border border-border bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 py-3.5">
           <h2 id="breakdown-h" className="text-base font-semibold">
             Parts breakdown
@@ -73,15 +136,15 @@ export function CarExplorer({
           />
         </div>
 
-        {/* Desktop table */}
-        <div className="hidden md:block">
-          <div className={`grid ${COLS} gap-3 border-t border-border bg-hover px-4 py-2 text-xs text-muted`}>
+        {/* Table when the card is wide enough (desktop, including beside the car) */}
+        <div className="hidden @min-[30rem]:block">
+          <div className={`grid ${COLS} gap-2 border-t border-border bg-hover px-4 py-2 text-xs text-muted @min-[48rem]:gap-3`}>
             <span>Name</span>
             <span className="text-right">To buy</span>
             <span className="text-right">Bought</span>
             <span className="text-right">Shipped</span>
             <span className="text-right">Built</span>
-            <span />
+            <span className="hidden @min-[48rem]:block" />
             <span />
           </div>
           {rows.map((r) => (
@@ -89,30 +152,38 @@ export function CarExplorer({
               key={r.id}
               href={href(r.id)}
               data-row={r.id}
-              className={`grid ${COLS} items-center gap-3 border-t border-divider px-4 py-3 text-sm transition-colors hover:bg-hover ${focus === r.id ? 'bg-accent-soft' : ''}`}
+              {...hoverProps(r.id)}
+              className={`grid ${COLS} items-center gap-2 border-t border-divider px-4 py-3 text-sm transition-colors hover:bg-hover @min-[48rem]:gap-3 ${isPicked(r.id) ? 'bg-accent-soft hover:bg-accent-soft' : ''}`}
             >
-              <span className="flex flex-wrap items-center gap-2 text-[15px]">
-                {r.name}
-                {r.flag && <span className="rounded-[5px] bg-warn-soft px-1.5 py-0.5 text-xs text-warn">{r.flag}</span>}
+              <span className="flex min-w-0 flex-col gap-1.5">
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+                  {r.name}
+                  {r.flag && <span className="rounded-[5px] bg-warn-soft px-1.5 py-0.5 text-xs text-warn">{r.flag}</span>}
+                </span>
+                <span className="@min-[48rem]:hidden">
+                  <StackedBar counts={r.counts} label={r.name} />
+                </span>
               </span>
               <span className="text-right font-mono text-accent">{r.counts.need}</span>
               <span className="text-right font-mono">{r.counts.bought}</span>
               <span className="text-right font-mono">{r.counts.shipped}</span>
               <span className="text-right font-mono">{r.counts.built}</span>
-              <StackedBar counts={r.counts} label={r.name} />
+              <span className="hidden @min-[48rem]:block">
+                <StackedBar counts={r.counts} label={r.name} />
+              </span>
               <ChevronRight aria-hidden size={16} className="text-faint" />
             </Link>
           ))}
         </div>
 
-        {/* Phone rows */}
-        <div className="md:hidden">
+        {/* Rows on narrow cards (phones) */}
+        <div className="@min-[30rem]:hidden">
           {rows.map((r) => (
             <Link
               key={r.id}
               href={href(r.id)}
               data-row={r.id}
-              className={`flex min-h-14 flex-col gap-[7px] border-t border-divider px-4 py-[13px] transition-colors ${focus === r.id ? 'bg-accent-soft' : ''}`}
+              className={`flex min-h-14 flex-col gap-[7px] border-t border-divider px-4 py-[13px] transition-colors ${isPicked(r.id) ? 'bg-accent-soft' : ''}`}
             >
               <span className="flex items-center gap-2">
                 <span className="flex-1 text-[15px]">{r.name}</span>
@@ -132,6 +203,6 @@ export function CarExplorer({
           ))}
         </div>
       </section>
-    </>
+    </div>
   )
 }
