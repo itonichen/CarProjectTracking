@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, FileUp, Plus } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from '@/lib/domain'
@@ -29,10 +29,16 @@ export default async function MoneyPage() {
       <PageHeader
         title="Money"
         action={
-          <Link href="/payments/new" className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium">
-            <Plus aria-hidden size={16} />
-            Payment
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/import" className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium">
+              <FileUp aria-hidden size={16} />
+              Import
+            </Link>
+            <Link href="/payments/new" className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium">
+              <Plus aria-hidden size={16} />
+              Payment
+            </Link>
+          </div>
         }
       />
       <div className="mx-auto max-w-2xl px-4 py-4 md:px-8">

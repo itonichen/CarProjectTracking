@@ -26,6 +26,22 @@ http://127.0.0.1:54324.
 `npm run seed` replaces the seed household, including any imported manuals,
 so re-run the manual import afterwards.
 
+## Importing and exporting
+
+**Import** (sidebar, or the Import button on Money) takes any CSV:
+
+- **Payments I made**: PayPal, Venmo or bank exports. Money coming in and
+  transfers (top-ups, withdrawals) are skipped with the reason shown, foreign
+  currency rows use the USD amount written in the row, and transaction IDs
+  already imported are skipped. Payments can be assigned to a car during import
+  or left for Money → To assign.
+- **Parts I bought**: a spreadsheet export. A car column is matched to your
+  cars by name or year; a "paid with" column also records the payment.
+
+Columns are guessed from the headers and can all be changed. Each import is one
+batch that can be undone from the Import page. Exports of purchases and
+payments are on the same page.
+
 ## Service manuals
 
 Manual PDFs and the diagrams cut from them live in the private `manuals`

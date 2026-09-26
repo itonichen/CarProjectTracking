@@ -21,6 +21,8 @@ export function QuickAddButton({ variant }: { variant: 'fab' | 'sidebar' }) {
       </button>
     )
   }
+  // The import screen has its own sticky action bar in that corner.
+  if (pathname.startsWith('/import')) return null
   return (
     <button
       type="button"
