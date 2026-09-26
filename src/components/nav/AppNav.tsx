@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FileUp, Settings } from 'lucide-react'
+import { QuickAddButton } from '@/components/quick-add/QuickAddButton'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import type { Theme } from '@/lib/theme'
 import { NAV_ITEMS, type NavItem } from './nav-items'
@@ -22,6 +23,7 @@ export function Sidebar({ theme }: { theme: Theme }) {
   return (
     <nav aria-label="Main" className="hidden md:flex md:w-56 md:shrink-0 md:flex-col md:gap-1 md:border-r md:border-border md:bg-surface md:px-3 md:py-5">
       <div className="px-3 pb-5 text-sm font-semibold tracking-wide text-muted uppercase">Garage</div>
+      <QuickAddButton variant="sidebar" />
       {[...NAV_ITEMS, ...extra].map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href)
         return (
