@@ -9,6 +9,7 @@ export type SlotListItem = {
   required_qty: number
   have_qty: number
   build_status: BuildStatus
+  status_label?: string | null
   destination: Destination
   needs_review: boolean
   fitment_notes: string | null
@@ -29,8 +30,8 @@ const STATUS_LABEL: Record<BuildStatus, string> = {
   installed: 'Installed',
 }
 
-export function StatusPill({ status }: { status: BuildStatus }) {
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[status]}`}>{STATUS_LABEL[status]}</span>
+export function StatusPill({ status, label }: { status: BuildStatus; label?: string | null }) {
+  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[status]}`}>{label ?? STATUS_LABEL[status]}</span>
 }
 
 export function DestinationTag({ destination }: { destination: Destination }) {
@@ -82,7 +83,7 @@ export function SystemParts({ slots, slotHref }: { slots: SlotListItem[]; slotHr
                             {s.needs_review && <TriangleAlert aria-label="Needs review" size={14} className="shrink-0 text-warn" />}
                           </div>
                           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <StatusPill status={s.build_status} />
+                            <StatusPill status={s.build_status} label={s.status_label} />
                             <DestinationTag destination={s.destination} />
                             {range && <span className="text-xs text-muted">{formatYearRange(range)}</span>}
                           </div>

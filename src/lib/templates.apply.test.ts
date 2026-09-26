@@ -9,14 +9,15 @@ test('DOHC NA -> TT gets TT engine, conversion and base systems', () => {
   assert.deepEqual(warnings, [])
   const keys = new Set(slots.map((s) => s.template_key))
   assert.ok(keys.has('engine_6G72_DOHC_TT:pistons'))
-  assert.ok(keys.has('conversion_TT:turbos'))
+  assert.ok(keys.has('conversion_TT:turbo_front'))
   assert.ok(keys.has('base:radiator'))
   assert.ok(keys.has('base:clutch_release_cylinder'))
   assert.ok(keys.has('base:clutch_damper'))
   assert.equal(keys.size, slots.length, 'template keys are unique')
-  assert.ok(slots.every((s) => !s.needs_review))
+  // Only the AWD/VR-4 parts from the parts-map design start out needing review.
+  assert.deepEqual(new Set(slots.filter((s) => s.needs_review).map((s) => s.subsystem)), new Set(['AWD / VR-4 drivetrain']))
   assert.equal(slots.find((s) => s.template_key === 'engine_6G72_DOHC_TT:valves')?.required_qty, 24)
-  assert.equal(slots.find((s) => s.template_key === 'conversion_TT:turbos')?.destination, 'builder')
+  assert.equal(slots.find((s) => s.template_key === 'conversion_TT:turbo_rear')?.destination, 'builder')
   assert.equal(slots.find((s) => s.template_key === 'conversion_TT:boost_gauge')?.destination, 'car')
 })
 
@@ -48,4 +49,15 @@ test('slots are ordered by system', () => {
   assert.equal(slots.at(-1)?.system, 'interior')
   const orders = slots.map((s) => s.sort_order)
   assert.deepEqual(orders, [...orders].sort((a, b) => a - b))
+})
+
+test('every template slot has a known zone and bay', async () => {
+  const { ZONE_BY_ID, BAY_BY_ID } = await import('./partsmap/zones')
+  for (const [o, t] of [['6G72_DOHC_NA', '6G72_DOHC_TT'], ['6G72_SOHC', '6G72_SOHC'], ['6G72_DOHC_NA', '6G72_DOHC_NA']] as const) {
+    const { slots } = buildSlotRows({ generation: gen2, original_engine_variant: o, target_engine_variant: t })
+    for (const s of slots) {
+      assert.ok(ZONE_BY_ID.has(s.zone as never), `${s.template_key} zone ${s.zone}`)
+      if (s.bay) assert.ok(BAY_BY_ID.has(s.bay as never), `${s.template_key} bay ${s.bay}`)
+    }
+  }
 })

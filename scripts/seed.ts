@@ -78,8 +78,8 @@ type Acq = {
 const ACQUISITIONS: Acq[] = [
   { car: 0, slot: 'engine_6G72_DOHC_TT:pistons', title: 'Wiseco 8.0:1 pistons, set of 6', qty: 6, source: 'ebay', seller: 'turbo_parts_direct', price: 899, shipping: 25, location: 'at_builder', daysAgo: 60, condition: 'new' },
   { car: 0, slot: 'engine_6G72_DOHC_TT:head_gaskets', title: 'MLS head gaskets (pair)', qty: 2, source: 'vendor', seller: 'Stealth 316', price: 219, location: 'at_builder', daysAgo: 55, condition: 'new' },
-  { car: 0, slot: 'conversion_TT:turbos', title: 'TD04-09B turbos with actuators', qty: 2, source: 'forum', seller: '3si member vr4dan', price: 650, shipping: 40, location: 'in_transit_to_builder', daysAgo: 20, condition: 'used, rebuilt' },
-  { car: 0, slot: 'conversion_TT:exh_manifolds', title: 'VR-4 exhaust manifolds', qty: 2, source: 'fb_marketplace', seller: 'Chris M.', price: 180, location: 'at_home', daysAgo: 12, condition: 'used' },
+  { car: 0, slot: 'conversion_TT:turbo_front', title: 'TD04-09B turbo with actuator', qty: 1, source: 'forum', seller: '3si member vr4dan', price: 650, shipping: 40, location: 'in_transit_to_builder', daysAgo: 20, condition: 'used, rebuilt' },
+  { car: 0, slot: 'conversion_TT:exh_manifold_front', title: 'VR-4 front exhaust manifold', qty: 1, source: 'fb_marketplace', seller: 'Chris M.', price: 180, location: 'at_home', daysAgo: 12, condition: 'used' },
   { car: 0, slot: 'conversion_TT:oil_housing', title: 'Turbo oil housing', source: 'ebay', seller: 'jdm_yard', price: 85, shipping: 18, location: 'at_home', daysAgo: 9, condition: 'used' },
   { car: 1, slot: 'engine_6G72_DOHC_TT:head_gaskets', title: 'MLS head gaskets (pair)', qty: 2, source: 'vendor', seller: 'Stealth 316', price: 219, location: 'at_home', daysAgo: 30, condition: 'new' },
   { car: 1, slot: 'conversion_TT:injectors', title: '360cc injectors x6, flow tested', qty: 6, source: 'ebay', seller: 'injector_shop', price: 210, shipping: 15, location: 'with_seller', daysAgo: 2, condition: 'cleaned' },

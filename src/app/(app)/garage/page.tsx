@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Plus, Wrench } from 'lucide-react'
-import { CarDiagram } from '@/components/diagram/CarDiagram'
 import { CarCardHeader } from '@/components/garage/CarCardHeader'
+import { MiniPartsMap } from '@/components/partsmap/MiniPartsMap'
 import { EngineBadges } from '@/components/ui/EngineBadges'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -42,8 +42,7 @@ export default async function GaragePage() {
           </EmptyState>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {cars.map(({ car, systems }) => {
-              const progress = Object.fromEntries(systems.map((s) => [s.system, s]))
+            {cars.map(({ car, zones }) => {
               const over = car.budget_cents > 0 && car.spent_cents > car.budget_cents
               const pct = car.budget_cents > 0 ? Math.min(1, car.spent_cents / car.budget_cents) : 0
               return (
@@ -52,14 +51,9 @@ export default async function GaragePage() {
                     <EngineBadges year={car.year} generation={car.generation} original={car.original_engine_variant} target={car.target_engine_variant} />
                   </CarCardHeader>
                   <Link href={`/cars/${car.id}`} className="block">
-                    <CarDiagram
-                      id={`mini-${car.id}`}
-                      mini
-                      generation={car.generation}
-                      progress={progress}
-                      showConversion={car.original_engine_variant !== car.target_engine_variant}
-                      className="my-3 block w-full"
-                    />
+                    <div className="my-3">
+                      <MiniPartsMap progress={zones} label={`${car.nickname}: parts still needed, by area of the car`} />
+                    </div>
                     <div className="tabular flex items-baseline justify-between text-sm">
                       <span className={over ? 'font-semibold text-warn' : 'font-semibold'}>{formatCents(car.spent_cents, { whole: true })}</span>
                       <span className="text-muted">{car.budget_cents ? `of ${formatCents(car.budget_cents, { whole: true })}` : 'No budget set'}</span>

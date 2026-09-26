@@ -51,3 +51,4 @@ export async function addAttachment(input: z.input<typeof attachmentSchema>) {
   revalidatePath('/', 'layout')
   return {}
 }
+

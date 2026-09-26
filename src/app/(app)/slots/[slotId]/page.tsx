@@ -5,7 +5,6 @@ import { ExternalLink, TriangleAlert } from 'lucide-react'
 import { EngineBadges } from '@/components/ui/EngineBadges'
 import { PageHeader } from '@/components/ui/PageHeader'
 import {
-  BUILD_STATUSES,
   LOCATION_LABELS,
   SOURCE_LABELS,
   SYSTEM_LABELS,
@@ -22,10 +21,12 @@ import { formatCents } from '@/lib/money'
 import { requireHousehold } from '@/lib/session'
 import { signedUrls } from '@/lib/storage'
 import { setBuildStatus } from '../actions'
+import { getPartStatuses } from '@/components/partsmap/actions'
 import { AddPurchaseButton } from './AddPurchaseButton'
 import { LocationSelect } from './LocationSelect'
 import { PhotoUpload } from './PhotoUpload'
 import { SlotDetailsForm } from './SlotDetailsForm'
+import { SlotStatusPicker } from './SlotStatusPicker'
 
 export const metadata: Metadata = { title: 'Part' }
 
@@ -41,6 +42,7 @@ type Slot = {
   fits_years: string | null
   destination: Destination
   build_status: BuildStatus
+  status_id: string | null
   needs_review: boolean
   template_key: string | null
 }
@@ -66,8 +68,6 @@ type LocationEvent = { acquisition_id: string; from_status: LocationStatus | nul
 type Attachment = { id: string; entity_type: string; entity_id: string; storage_path: string; caption: string | null }
 type FigureLink = { figure: { id: string; title: string; page: number; storage_path: string; document: { title: string } } }
 
-const STATUS_LABEL: Record<BuildStatus, string> = { needed: 'Needed', sourcing: 'Sourcing', have: 'Have', installed: 'Installed' }
-
 const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 const formatDate = (d: string) => dateFmt.format(new Date(d.length === 10 ? `${d}T12:00:00` : d))
 
@@ -77,14 +77,14 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
 
   const slotRes = await supabase
     .from('slot_progress')
-    .select('id, car_id, system, subsystem, name, required_qty, have_qty, fitment_notes, fits_years, destination, build_status, needs_review, template_key')
+    .select('id, car_id, system, subsystem, name, required_qty, have_qty, fitment_notes, fits_years, destination, build_status, status_id, needs_review, template_key')
     .eq('id', slotId)
     .maybeSingle()
   if (slotRes.error) throw slotRes.error
   if (!slotRes.data) notFound()
   const slot = slotRes.data as Slot
 
-  const [carRes, acqRes, figRes] = await Promise.all([
+  const [carRes, acqRes, figRes, statuses] = await Promise.all([
     supabase.from('cars').select('id, nickname, year, generation, original_engine_variant, target_engine_variant').eq('id', slot.car_id).single(),
     supabase
       .from('acquisitions')
@@ -94,6 +94,7 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
     slot.template_key
       ? supabase.from('figure_slot_links').select('figure:document_figures(id, title, page, storage_path, document:documents(title))').eq('template_key', slot.template_key)
       : Promise.resolve({ data: [], error: null }),
+    getPartStatuses(),
   ])
   if (carRes.error) throw carRes.error
   if (acqRes.error) throw acqRes.error
@@ -150,32 +151,20 @@ export default async function SlotPage(props: PageProps<'/slots/[slotId]'>) {
         {/* Build status + quantity */}
         <section aria-labelledby="status-h" className="rounded-2xl border border-border bg-surface p-4">
           <div className="flex items-baseline justify-between">
-            <h2 id="status-h" className="font-semibold">Build status</h2>
+            <h2 id="status-h" className="font-semibold">Status</h2>
             <span className="tabular text-sm text-muted">
               <span className={`font-semibold ${covered ? 'text-ok' : 'text-text'}`}>{Math.min(slot.have_qty, slot.required_qty)}</span> of {slot.required_qty} on hand
             </span>
           </div>
-          <form action={setBuildStatus} className="mt-3 grid grid-cols-4 gap-1 rounded-xl bg-surface-2 p-1" role="radiogroup" aria-label="Build status">
-            <input type="hidden" name="id" value={slot.id} />
-            {BUILD_STATUSES.map((s) => (
-              <button
-                key={s}
-                name="build_status"
-                value={s}
-                role="radio"
-                aria-checked={slot.build_status === s}
-                className={`h-10 rounded-lg text-sm font-medium ${slot.build_status === s ? 'bg-surface shadow-sm' : 'text-muted hover:text-text'}`}
-              >
-                {STATUS_LABEL[s]}
-              </button>
-            ))}
-          </form>
+          <div className="mt-3">
+            <SlotStatusPicker slotId={slot.id} current={slot.status_id} statuses={statuses} />
+          </div>
           {suggestHave && (
             <form action={setBuildStatus} className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-ok-soft px-3 py-2 text-sm text-ok">
               <input type="hidden" name="id" value={slot.id} />
               <span>Purchases cover the {slot.required_qty} needed.</span>
               <button name="build_status" value="have" className="shrink-0 font-semibold underline">
-                Mark as Have
+                Mark as {statuses.find((s) => s.category === 'have')?.label ?? 'Have'}
               </button>
             </form>
           )}

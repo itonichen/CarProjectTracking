@@ -68,6 +68,7 @@ git-ignored.
 | `npm run typecheck` | TypeScript |
 | `npm run seed` | Dev seed data (local Supabase only) |
 | `npm run manuals:import` | Upload a manual and its figures |
+| `npm run partsmap:apply` | Apply a parts-map `parts.json`'s statuses to one car (dry run; `-- --apply` to write) |
 | `npm run templates:sync` | Add slots added to `src/lib/templates.ts` to existing cars (dry run; `-- --apply` to write) |
 
 ## Deploying to Vercel

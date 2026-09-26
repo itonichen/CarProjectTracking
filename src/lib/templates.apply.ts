@@ -14,6 +14,8 @@ export type SlotRow = {
   needs_review: boolean
   sort_order: number
   template_key: string
+  zone: string
+  bay: string | null
 }
 
 export type TemplatePlan = {
@@ -69,6 +71,8 @@ export function buildSlotRows(car: CarShape): { slots: SlotRow[]; warnings: stri
         needs_review: Boolean(forceReview || template.review || s.review),
         sort_order: 0,
         template_key: `${template.key}:${s.key}`,
+        zone: s.zone,
+        bay: s.bay ?? null,
       })
     }
   }

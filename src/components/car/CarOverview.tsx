@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { ChevronRight, TriangleAlert } from 'lucide-react'
-import { CarDiagram, type SystemProgress } from '@/components/diagram/CarDiagram'
+import type { PartStatus } from '@/components/partsmap/actions'
+import { PartsMap } from '@/components/partsmap/PartsMap'
 import { EngineBadges } from '@/components/ui/EngineBadges'
 import { SYSTEMS, SYSTEM_LABELS, type CarSystem, type EngineVariant, type Generation } from '@/lib/domain'
-import { formatCents } from '@/lib/money'
+import type { MapSlot } from '@/lib/partsmap/stats'
 
 export type CarOverviewData = {
   id: string
@@ -19,15 +20,19 @@ export type CarOverviewData = {
   at_builder_count: number
 }
 
-export type SystemRow = SystemProgress & { system: CarSystem; open: number; review: number }
+export type SystemRow = { system: CarSystem; done: number; total: number; open: number; review: number }
 
 export function CarOverview({
   car,
   systems,
+  slots,
+  statuses,
   systemHref,
 }: {
   car: CarOverviewData
   systems: SystemRow[]
+  slots: MapSlot[]
+  statuses: PartStatus[]
   systemHref: (system: CarSystem) => string
 }) {
   const showConversion = car.original_engine_variant !== car.target_engine_variant
@@ -35,8 +40,6 @@ export function CarOverview({
   const ordered = SYSTEMS.filter((s) => s !== 'conversion' || showConversion).map(
     (system) => progress[system] ?? { system, done: 0, total: 0, open: 0, review: 0 },
   )
-  const overBudget = car.budget_cents > 0 && car.spent_cents > car.budget_cents
-  const spentPct = car.budget_cents > 0 ? Math.min(1, car.spent_cents / car.budget_cents) : 0
 
   return (
     <div className="space-y-5">
@@ -45,23 +48,16 @@ export function CarOverview({
         {car.trim && <span className="text-xs text-muted">{car.trim}</span>}
       </div>
 
-      <section aria-labelledby="diagram-h" className="-mx-4 bg-surface px-2 py-4 md:mx-0 md:rounded-2xl md:border md:border-border md:px-6">
-        <h2 id="diagram-h" className="sr-only">
-          Progress by system
+      <section aria-labelledby="map-h">
+        <h2 id="map-h" className="sr-only">
+          Parts map
         </h2>
-        <CarDiagram id={`car-${car.id}`} generation={car.generation} progress={progress} showConversion={showConversion} hrefFor={systemHref} className="mx-auto block w-full max-w-3xl" />
-        <p className="mt-1 text-center text-xs text-muted">Tap a zone to see its parts. Counts are slots you have or have installed.</p>
+        <PartsMap slots={slots} statuses={statuses} />
       </section>
-
-      <dl className="grid grid-cols-3 gap-2 text-center">
-        <Stat label="Spent" value={formatCents(car.spent_cents, { whole: true })} sub={car.budget_cents ? `of ${formatCents(car.budget_cents, { whole: true })}` : 'no budget'} tone={overBudget ? 'warn' : undefined} bar={spentPct} />
-        <Stat label="Still needed" value={String(car.open_slots)} sub="slots" />
-        <Stat label="At builder" value={String(car.at_builder_count)} sub="parts" />
-      </dl>
 
       <section aria-labelledby="systems-h">
         <h2 id="systems-h" className="mb-2 text-sm font-semibold text-muted">
-          Systems
+          By system
         </h2>
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
           {ordered.map((s) => {
@@ -95,21 +91,6 @@ export function CarOverview({
           })}
         </ul>
       </section>
-    </div>
-  )
-}
-
-function Stat({ label, value, sub, tone, bar }: { label: string; value: string; sub: string; tone?: 'warn'; bar?: number }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface px-2 py-3">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className={`tabular mt-0.5 text-lg font-semibold ${tone === 'warn' ? 'text-warn' : ''}`}>{value}</dd>
-      <dd className="text-xs text-muted">{sub}</dd>
-      {bar !== undefined && (
-        <dd aria-hidden className="mx-auto mt-1.5 h-1 w-3/4 overflow-hidden rounded-full bg-surface-2">
-          <div className={`h-full ${tone === 'warn' ? 'bg-warn' : 'bg-accent'}`} style={{ width: `${bar * 100}%` }} />
-        </dd>
-      )}
     </div>
   )
 }

@@ -13,6 +13,8 @@ const row = (template_key: string): SlotRow => ({
   needs_review: false,
   sort_order: 0,
   template_key,
+  zone: 'drivetrain',
+  bay: null,
 })
 
 test('adds only missing slots, ordered after their template neighbour', () => {

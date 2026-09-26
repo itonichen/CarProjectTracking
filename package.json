@@ -11,7 +11,8 @@
     "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "manuals:import": "tsx scripts/manuals/import-manual.ts",
-    "templates:sync": "tsx scripts/sync-templates.ts"
+    "templates:sync": "tsx scripts/sync-templates.ts",
+    "partsmap:apply": "tsx scripts/apply-parts-json.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
