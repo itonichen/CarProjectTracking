@@ -128,3 +128,12 @@ export function yearFits(year: number, r: YearRange | null): boolean {
   if (!r) return true
   return (r.from === null || year >= r.from) && (r.to === null || year <= r.to)
 }
+
+export const COST_TYPES = ['labor', 'car_purchase', 'other'] as const
+export type CostType = (typeof COST_TYPES)[number]
+
+export const COST_TYPE_LABELS: Record<CostType, string> = {
+  labor: 'Builder labor',
+  car_purchase: 'Car purchase',
+  other: 'Other car cost',
+}
