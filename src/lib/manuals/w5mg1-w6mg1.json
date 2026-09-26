@@ -1,0 +1,392 @@
+{
+  "slug": "w5mg1-w6mg1-manual-transmission",
+  "title": "W5MG1 / W6MG1 manual transmission service manual",
+  "applies_to": "AWD (VR-4 / Stealth R/T Turbo / GTO Twin Turbo) Getrag 5- and 6-speed. Clutch section is broadly useful; transmission and transfer case sections do not apply to FWD cars.",
+  "source_note": "3000GT/Stealth International (3si.org) translation of the Mitsubishi manual, plus DaimlerChrysler recall B17.",
+  "figures": [
+    {
+      "key": "clutch-assembly",
+      "page": 8,
+      "crop": [
+        0.0,
+        0.075,
+        1.0,
+        0.97
+      ],
+      "section": "Clutch",
+      "title": "Clutch assembly: removal and installation (exploded view, torque specs)",
+      "kind": "illustration",
+      "template_keys": [
+        "base:clutch"
+      ]
+    },
+    {
+      "key": "clutch-disc-cover-install",
+      "page": 11,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.445
+      ],
+      "section": "Clutch",
+      "title": "Installing the clutch disc and cover",
+      "kind": "illustration",
+      "template_keys": [
+        "base:clutch"
+      ]
+    },
+    {
+      "key": "clutch-release-cylinder",
+      "page": 12,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.62
+      ],
+      "section": "Clutch",
+      "title": "Clutch release cylinder: disassembly",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "clutch-damper",
+      "page": 14,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.6
+      ],
+      "section": "Clutch",
+      "title": "Clutch damper: disassembly",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "cross-section-w5mg1",
+      "page": 17,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Cross-section, W5MG1 (5-speed)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "cross-section-w6mg1",
+      "page": 18,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Cross-section, W6MG1 (6-speed)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "lubricants",
+      "page": 21,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.3
+      ],
+      "section": "Transmission",
+      "title": "Lubricants: gear oil spec (API GL-4, 75W-90 to 75W-85W)",
+      "kind": "reference",
+      "template_keys": [
+        "base:trans_fluid"
+      ]
+    },
+    {
+      "key": "case-w5mg1-1",
+      "page": 28,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W5MG1 (1 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "case-w5mg1-2",
+      "page": 29,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W5MG1 (2 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "case-w5mg1-3",
+      "page": 30,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W5MG1 (3 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "case-w6mg1-1",
+      "page": 31,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W6MG1 (1 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "case-w6mg1-2",
+      "page": 32,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W6MG1 (2 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "case-w6mg1-3",
+      "page": 33,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Transmission case, W6MG1 (3 of 3)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "input-shaft-w5mg1",
+      "page": 49,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.93
+      ],
+      "section": "Transmission",
+      "title": "Input shaft, W5MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "input-shaft-w6mg1",
+      "page": 50,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.93
+      ],
+      "section": "Transmission",
+      "title": "Input shaft, W6MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "intermediate-shaft-w5mg1",
+      "page": 55,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Intermediate shaft, W5MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "intermediate-shaft-w6mg1",
+      "page": 56,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Intermediate shaft, W6MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "sync-3-4",
+      "page": 65,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.62
+      ],
+      "section": "Transmission",
+      "title": "3rd\u20134th synchronizer, W6MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "sync-5-6",
+      "page": 66,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.62
+      ],
+      "section": "Transmission",
+      "title": "5th\u20136th synchronizer, W6MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "center-differential",
+      "page": 67,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.95
+      ],
+      "section": "Transmission",
+      "title": "Center differential (viscous coupling)",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "front-output-shaft",
+      "page": 70,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.605
+      ],
+      "section": "Transmission",
+      "title": "Front output shaft",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "rear-cover-w5mg1",
+      "page": 72,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Rear cover, W5MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "rear-cover-w6mg1",
+      "page": 73,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.97
+      ],
+      "section": "Transmission",
+      "title": "Rear cover, W6MG1",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "front-differential",
+      "page": 77,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.6
+      ],
+      "section": "Transmission",
+      "title": "Front differential",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "speedometer-gear",
+      "page": 79,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.62
+      ],
+      "section": "Transmission",
+      "title": "Speedometer gear",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "transfer-case",
+      "page": 80,
+      "crop": [
+        0.0,
+        0.08,
+        1.0,
+        0.56
+      ],
+      "section": "Transfer case",
+      "title": "Transfer case: oil seals and removal",
+      "kind": "illustration",
+      "template_keys": []
+    },
+    {
+      "key": "transfer-case-fill",
+      "page": 97,
+      "crop": [
+        0.0,
+        0.05,
+        1.0,
+        0.95
+      ],
+      "section": "Transfer case",
+      "title": "Recall B17: filling the transfer case (9.25 oz 5-speed / 20.25 oz 6-speed, 75W-90 GL-5)",
+      "kind": "reference",
+      "template_keys": []
+    }
+  ]
+}

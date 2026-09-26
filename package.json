@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "tsx --test 'src/**/*.test.ts'",
     "seed": "tsx scripts/seed.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "manuals:import": "tsx scripts/manuals/import-manual.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Real bank/PayPal/Venmo exports stay local
 data/*.csv
+
+# Extracted manual pages/figures (not ours to redistribute)
+data/manuals/
